@@ -29,6 +29,16 @@ const _nav = [
   },
   {
     component: CNavTitle,
+    name: 'Classical',
+  },
+  {
+    component: CNavItem,
+    name: 'Composer',
+    to: '/classical/composer',
+    icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
     name: 'Theme',
   },
   {
