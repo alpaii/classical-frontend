@@ -1,0 +1,11 @@
+services:
+  app:
+    image: node:22
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/home/node/app
+    working_dir: /home/node/app
+    stdin_open: true
+    tty: true
+    command: /bin/bash
