@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 import {
   CButton,
   CCard,
@@ -10,235 +11,236 @@ import {
   CFormLabel,
   CFormTextarea,
   CRow,
+  CTable,
+  CTableBody,
+  CTableCaption,
+  CTableDataCell,
+  CTableHead,
+  CTableHeaderCell,
+  CTableRow,
 } from '@coreui/react'
-import { DocsComponents, DocsExample } from 'src/components'
+import CIcon from '@coreui/icons-react'
+import {
+  cilPlus,
+  cilMedicalCross,
+  cilPencil,
+  cilX,
+  cilCheck,
+  cilCheckAlt,
+  cilReload,
+} from '@coreui/icons'
+
+const API_URL = 'http://127.0.0.1:8000/api/composers/'
 
 const Composer = () => {
+  const [composers, setComposers] = useState([]) // 작곡가 목록 상태
+  const [newComposer, setNewComposer] = useState({ name: '', full_name: '' }) // 새 작곡가 입력 상태
+  const [editingId, setEditingId] = useState(null) // 현재 편집 중인 작곡가 ID
+  const [editedComposer, setEditedComposer] = useState({ name: '', full_name: '' }) // 편집 중인 데이터
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // 📌 서버에서 데이터 가져오기
+  useEffect(() => {
+    fetchComposers()
+  }, [])
+
+  const fetchComposers = async () => {
+    setLoading(true)
+    try {
+      const response = await axios.get(API_URL)
+      setComposers(response.data)
+    } catch (err) {
+      setError('Failed to load composers')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 📌 새 작곡가 추가 함수
+  const addComposer = async () => {
+    if (!newComposer.name || !newComposer.full_name) {
+      alert('Please enter both name and full name')
+      return
+    }
+
+    try {
+      const response = await axios.post(API_URL, newComposer) // 서버에 추가 요청
+      fetchComposers() // 다시 불러오기
+      setNewComposer({ name: '', full_name: '' }) // 입력 필드 초기화
+    } catch (err) {
+      alert('Failed to add composer')
+    }
+  }
+
+  // 📌 편집 모드 활성화
+  const startEditing = (composer) => {
+    setEditingId(composer.id)
+    setEditedComposer({ name: composer.name, full_name: composer.full_name })
+  }
+
+  // 📌 편집 내용 저장 (업데이트)
+  const updateComposer = async (id) => {
+    try {
+      await axios.put(`${API_URL}${id}/`, editedComposer) // Django API에 PUT 요청
+      fetchComposers() // 목록 갱신
+      setEditingId(null) // 편집 종료
+    } catch (err) {
+      alert('Failed to update composer')
+    }
+  }
+
+  // 📌 편집 데이터 삭제 (delete)
+  const deleteComposer = async (id) => {
+    try {
+      await axios.delete(`${API_URL}${id}/`) // Django API에 PUT 요청
+      fetchComposers() // 목록 갱신
+      setEditingId(null) // 편집 종료
+    } catch (err) {
+      alert('Failed to delete composer')
+    }
+  }
+
+  // 📌 편집 취소
+  const cancelEditing = () => {
+    setEditingId(null)
+  }
+
   return (
     <CRow>
       <CCol xs={12}>
-        <DocsComponents href="forms/form-control/" />
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Form Control</strong>
-          </CCardHeader>
+        <CCard className="mb-4 border-secondary border-top-2">
+          {/* <CCardHeader>Composer List</CCardHeader> */}
           <CCardBody>
-            <DocsExample href="forms/form-control">
-              <CForm>
-                <div className="mb-3">
-                  <CFormLabel htmlFor="exampleFormControlInput1">Email address</CFormLabel>
-                  <CFormInput
-                    type="email"
-                    id="exampleFormControlInput1"
-                    placeholder="name@example.com"
-                  />
-                </div>
-                <div className="mb-3">
-                  <CFormLabel htmlFor="exampleFormControlTextarea1">Example textarea</CFormLabel>
-                  <CFormTextarea id="exampleFormControlTextarea1" rows={3}></CFormTextarea>
-                </div>
-              </CForm>
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Form Control</strong> <small>Sizing</small>
-          </CCardHeader>
-          <CCardBody>
-            <p className="text-body-secondary small">
-              Set heights using <code>size</code> property like <code>size=&#34;lg&#34;</code> and{' '}
-              <code>size=&#34;sm&#34;</code>.
-            </p>
-            <DocsExample href="forms/form-control#sizing">
-              <CFormInput
-                type="text"
-                size="lg"
-                placeholder="Large input"
-                aria-label="lg input example"
-              />
-              <br />
-              <CFormInput
-                type="text"
-                placeholder="Default input"
-                aria-label="default input example"
-              />
-              <br />
-              <CFormInput
-                type="text"
-                size="sm"
-                placeholder="Small input"
-                aria-label="sm input example"
-              />
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Form Control</strong> <small>Disabled</small>
-          </CCardHeader>
-          <CCardBody>
-            <p className="text-body-secondary small">
-              Add the <code>disabled</code> boolean attribute on an input to give it a grayed out
-              appearance and remove pointer events.
-            </p>
-            <DocsExample href="forms/form-control#disabled">
-              <CFormInput
-                type="text"
-                placeholder="Disabled input"
-                aria-label="Disabled input example"
-                disabled
-              />
-              <br />
-              <CFormInput
-                type="text"
-                placeholder="Disabled readonly input"
-                aria-label="Disabled input example"
-                disabled
-                readOnly
-              />
-              <br />
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Form Control</strong> <small>Readonly</small>
-          </CCardHeader>
-          <CCardBody>
-            <p className="text-body-secondary small">
-              Add the <code>readOnly</code> boolean attribute on an input to prevent modification of
-              the input&#39;s value. Read-only inputs appear lighter (just like disabled inputs),
-              but retain the standard cursor.
-            </p>
-            <DocsExample href="forms/form-control#readonly">
-              <CFormInput
-                type="text"
-                placeholder="Readonly input here..."
-                aria-label="readonly input example"
-                readOnly
-              />
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Form Control</strong> <small>Readonly plain text</small>
-          </CCardHeader>
-          <CCardBody>
-            <p className="text-body-secondary small">
-              If you want to have <code>&lt;input readonly&gt;</code> elements in your form styled
-              as plain text, use the <code>plainText</code> boolean property to remove the default
-              form field styling and preserve the correct margin and padding.
-            </p>
-            <DocsExample href="components/accordion">
-              <CRow className="mb-3">
-                <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
-                  Email
-                </CFormLabel>
-                <div className="col-sm-10">
-                  <CFormInput
-                    type="text"
-                    id="staticEmail"
-                    defaultValue="email@example.com"
-                    readOnly
-                    plainText
-                  />
-                </div>
-              </CRow>
-              <CRow className="mb-3">
-                <CFormLabel htmlFor="inputPassword" className="col-sm-2 col-form-label">
-                  Password
-                </CFormLabel>
-                <div className="col-sm-10">
-                  <CFormInput type="password" id="inputPassword" />
-                </div>
-              </CRow>
-            </DocsExample>
-            <DocsExample href="components/accordion">
-              <CForm className="row g-3">
-                <div className="col-auto">
-                  <CFormLabel htmlFor="staticEmail2" className="visually-hidden">
-                    Email
-                  </CFormLabel>
-                  <CFormInput
-                    type="text"
-                    id="staticEmail2"
-                    defaultValue="email@example.com"
-                    readOnly
-                    plainText
-                  />
-                </div>
-                <div className="col-auto">
-                  <CFormLabel htmlFor="inputPassword2" className="visually-hidden">
-                    Password
-                  </CFormLabel>
-                  <CFormInput type="password" id="inputPassword2" placeholder="Password" />
-                </div>
-                <div className="col-auto">
-                  <CButton color="primary" type="submit" className="mb-3">
-                    Confirm identity
-                  </CButton>
-                </div>
-              </CForm>
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Form Control</strong> <small>File input</small>
-          </CCardHeader>
-          <CCardBody>
-            <DocsExample href="forms/form-control#file-input">
-              <div className="mb-3">
-                <CFormLabel htmlFor="formFile">Default file input example</CFormLabel>
-                <CFormInput type="file" id="formFile" />
-              </div>
-              <div className="mb-3">
-                <CFormLabel htmlFor="formFileMultiple">Multiple files input example</CFormLabel>
-                <CFormInput type="file" id="formFileMultiple" multiple />
-              </div>
-              <div className="mb-3">
-                <CFormLabel htmlFor="formFileDisabled">Disabled file input example</CFormLabel>
-                <CFormInput type="file" id="formFileDisabled" disabled />
-              </div>
-              <div className="mb-3">
-                <CFormLabel htmlFor="formFileSm">Small file input example</CFormLabel>
-                <CFormInput type="file" size="sm" id="formFileSm" />
-              </div>
-              <div>
-                <CFormLabel htmlFor="formFileLg">Large file input example</CFormLabel>
-                <CFormInput type="file" size="lg" id="formFileLg" />
-              </div>
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Form Control</strong> <small>Color</small>
-          </CCardHeader>
-          <CCardBody>
-            <DocsExample href="forms/form-control#color">
-              <CFormLabel htmlFor="exampleColorInput">Color picker</CFormLabel>
-              <CFormInput
-                type="color"
-                id="exampleColorInput"
-                defaultValue="#563d7c"
-                title="Choose your color"
-              />
-            </DocsExample>
+            <CTable bordered className="table-fixed">
+              <CTableHead color="light">
+                <CTableRow>
+                  <CTableHeaderCell scope="col" className="col-4">
+                    Name
+                  </CTableHeaderCell>
+                  <CTableHeaderCell scope="col" className="col-6">
+                    Full Name
+                  </CTableHeaderCell>
+                  <CTableHeaderCell scope="col" className="col-2"></CTableHeaderCell>
+                </CTableRow>
+              </CTableHead>
+              <CTableBody>
+                {/* ✅ 입력 필드 (새로운 작곡가 추가용) */}
+                <CTableRow color="info">
+                  <CTableDataCell>
+                    <CFormInput
+                      type="text"
+                      placeholder="New Composer Name"
+                      value={newComposer.name}
+                      onChange={(e) => setNewComposer({ ...newComposer, name: e.target.value })}
+                    />
+                  </CTableDataCell>
+                  <CTableDataCell>
+                    <CFormInput
+                      type="text"
+                      placeholder="New Composer Full Name"
+                      value={newComposer.full_name}
+                      onChange={(e) =>
+                        setNewComposer({ ...newComposer, full_name: e.target.value })
+                      }
+                    />
+                  </CTableDataCell>
+                  <CTableDataCell className="text-center">
+                    <CButton color="success" variant="ghost" onClick={addComposer}>
+                      <CIcon icon={cilMedicalCross} size="l" />
+                    </CButton>
+                  </CTableDataCell>
+                </CTableRow>
+
+                {/* ✅ 데이터 로딩 상태 */}
+                {loading && (
+                  <CTableRow>
+                    <CTableDataCell colSpan={3} className="text-center">
+                      Loading...
+                    </CTableDataCell>
+                  </CTableRow>
+                )}
+
+                {/* ✅ 에러 발생 시 메시지 */}
+                {error && (
+                  <CTableRow>
+                    <CTableDataCell colSpan={3} className="text-center text-danger">
+                      {error}
+                    </CTableDataCell>
+                  </CTableRow>
+                )}
+
+                {/* ✅ 서버에서 가져온 작곡가 목록 */}
+                {!loading &&
+                  !error &&
+                  composers.map((composer) =>
+                    editingId === composer.id ? ( // 편집 중인 작곡가인 경우
+                      <CTableRow key={composer.id} color="warning">
+                        <CTableDataCell>
+                          <CFormInput
+                            type="text"
+                            value={editedComposer.name}
+                            onChange={(e) =>
+                              setEditedComposer({ ...editedComposer, name: e.target.value })
+                            }
+                          />
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CFormInput
+                            type="text"
+                            value={editedComposer.full_name}
+                            onChange={(e) =>
+                              setEditedComposer({ ...editedComposer, full_name: e.target.value })
+                            }
+                          />
+                        </CTableDataCell>
+                        <CTableDataCell className="text-center">
+                          <CButton
+                            color="secondary"
+                            variant="ghost"
+                            size="sm"
+                            onClick={cancelEditing}
+                          >
+                            <CIcon icon={cilReload} size="l" />
+                          </CButton>
+
+                          <CButton
+                            color="info"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => updateComposer(composer.id)}
+                          >
+                            <CIcon icon={cilCheck} size="l" />
+                          </CButton>
+                          <CButton
+                            color="danger"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteComposer(composer.id)}
+                          >
+                            <CIcon icon={cilX} size="l" />
+                          </CButton>
+                        </CTableDataCell>
+                      </CTableRow>
+                    ) : (
+                      <CTableRow key={composer.id}>
+                        <CTableDataCell>{composer.name}</CTableDataCell>
+                        <CTableDataCell>{composer.full_name}</CTableDataCell>
+                        <CTableDataCell className="text-center">
+                          <CButton
+                            color="info"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditing(composer)}
+                          >
+                            <CIcon icon={cilPencil} size="l" />
+                          </CButton>
+                        </CTableDataCell>
+                      </CTableRow>
+                    ),
+                  )}
+              </CTableBody>
+            </CTable>
           </CCardBody>
         </CCard>
       </CCol>
