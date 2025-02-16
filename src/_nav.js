@@ -34,8 +34,26 @@ const _nav = [
   },
   {
     component: CNavItem,
+    name: 'Performer',
+    to: '/classical/performer',
+    icon: <CIcon icon={cilCheckAlt} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
     name: 'Composer',
     to: '/classical/composer',
+    icon: <CIcon icon={cilCheckAlt} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Work',
+    to: '/classical/work',
+    icon: <CIcon icon={cilCheckAlt} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Recording',
+    to: '/classical/recording',
     icon: <CIcon icon={cilCheckAlt} customClassName="nav-icon" />,
   },
   {

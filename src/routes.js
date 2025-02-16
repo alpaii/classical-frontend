@@ -4,6 +4,9 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 
 // Classical
 const Composer = React.lazy(() => import('./views/classical/composer/Composer'))
+const Performer = React.lazy(() => import('./views/classical/performer/Performer'))
+const Work = React.lazy(() => import('./views/classical/work/Work'))
+const Recording = React.lazy(() => import('./views/classical/recording/Recording'))
 
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -59,7 +62,10 @@ const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/classical', name: 'Classical', element: Composer, exact: true },
+  { path: '/classical/performer', name: 'Performer', element: Performer },
   { path: '/classical/composer', name: 'Composer', element: Composer },
+  { path: '/classical/work', name: 'Work', element: Work },
+  { path: '/classical/recording', name: 'Recording', element: Recording },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },

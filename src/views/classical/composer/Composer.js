@@ -110,7 +110,7 @@ const Composer = () => {
     <CRow>
       <CCol xs={12}>
         <CCard className="mb-4 border-secondary border-top-2">
-          {/* <CCardHeader>Composer List</CCardHeader> */}
+          <CCardHeader>Composer List</CCardHeader>
           <CCardBody>
             <CTable bordered className="table-fixed">
               <CTableHead color="light">
