@@ -1,44 +1,28 @@
 import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import {
-  CButton,
+  CRow,
+  CCol,
   CCard,
   CCardBody,
-  CCardHeader,
-  CCol,
+  CButton,
   CForm,
   CFormInput,
   CFormLabel,
-  CFormTextarea,
-  CInputGroup,
-  CInputGroupText,
-  CFormSelect,
-  CFormCheck,
-  CRow,
-  CTable,
-  CTableBody,
-  CTableCaption,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
   CModal,
   CModalBody,
   CModalFooter,
   CModalHeader,
   CModalTitle,
-  CTooltip,
+  CTable,
+  CTableBody,
+  CTableDataCell,
+  CTableHead,
+  CTableHeaderCell,
+  CTableRow,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import {
-  cilPlus,
-  cilMedicalCross,
-  cilPencil,
-  cilX,
-  cilCheck,
-  cilCheckAlt,
-  cilReload,
-} from '@coreui/icons'
+import { cilPlus, cilPencil, cilX } from '@coreui/icons'
 // import { set } from '@core-js/core/dict'
 
 const API_URL = 'http://127.0.0.1:8000/api/composers/'
@@ -46,20 +30,20 @@ const API_URL = 'http://127.0.0.1:8000/api/composers/'
 const Composer = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [composers, setComposers] = useState([]) // 작곡가 목록 상태
+  const [composers, setComposers] = useState([]) // composer list
 
-  const [addComposer, setAddComposer] = useState({ name: '', full_name: '' }) // 새 작곡가 입력 상태
-  const [modalAddVisible, setModalAddVisible] = useState(false) // ✅ 모달 상태 추가
-  const nameAddInputRef = useRef(null) // ✅ `useRef`로 name 입력 필드 참조 생성
+  const [addComposer, setAddComposer] = useState({ name: '', full_name: '' }) // add new
+  const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
+  const nameAddInputRef = useRef(null) // focus
 
-  const [updateComposer, setUpdateComposer] = useState({ id: '', name: '', full_name: '' }) // 작곡가 편집 상태
-  const [modalUpdateVisible, setModalUpdateVisible] = useState(false) // ✅ 모달 상태 추가
-  const nameUpdateInputRef = useRef(null) // ✅ `useRef`로 name 입력 필드 참조 생성
+  const [updateComposer, setUpdateComposer] = useState({ id: '', name: '', full_name: '' }) // update
+  const [modalUpdateVisible, setModalUpdateVisible] = useState(false) // update modal
+  const nameUpdateInputRef = useRef(null) // focus
 
-  const [deleteComposer, setDeleteComposer] = useState({ id: '' }) // 작곡가 삭제 상태
-  const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // ✅ 모달 상태 추가
+  const [deleteComposer, setDeleteComposer] = useState({ id: '' }) // delete
+  const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
-  const [searchQuery, setSearchQuery] = useState('') // 검색 입력 상태
+  const [searchQuery, setSearchQuery] = useState('') // search
 
   // 📌 서버에서 데이터 가져오기
   useEffect(() => {
