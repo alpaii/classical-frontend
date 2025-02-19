@@ -213,8 +213,10 @@ const Composer = () => {
                   !error &&
                   composers.map((composer) => (
                     <CTableRow key={composer.id}>
-                      <CTableDataCell>{composer.name}</CTableDataCell>
-                      <CTableDataCell>{composer.full_name}</CTableDataCell>
+                      <CTableDataCell className="table-cell-wrap">{composer.name}</CTableDataCell>
+                      <CTableDataCell className="table-cell-wrap">
+                        {composer.full_name}
+                      </CTableDataCell>
                       <CTableDataCell className="text-center">
                         <CButton
                           color="info"

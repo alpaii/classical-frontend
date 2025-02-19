@@ -97,3 +97,8 @@ body {
 .hover-white:hover {
   color: white !important;
 }
+
+.table-cell-wrap {
+  word-break: break-word; 
+  white-space: normal;
+}

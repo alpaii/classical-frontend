@@ -258,8 +258,8 @@ const Work = () => {
                 {/* ✅ Work 목록 */}
                 {works.map((work) => (
                   <CTableRow key={work.id}>
-                    <CTableDataCell>{work.work_no}</CTableDataCell>
-                    <CTableDataCell>{work.name}</CTableDataCell>
+                    <CTableDataCell className="table-cell-wrap">{work.work_no}</CTableDataCell>
+                    <CTableDataCell className="table-cell-wrap">{work.name}</CTableDataCell>
                     <CTableDataCell className="text-center">
                       <CButton
                         color="info"
