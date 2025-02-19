@@ -9,6 +9,8 @@ import {
   CForm,
   CFormInput,
   CFormLabel,
+  CInputGroup,
+  CInputGroupText,
   CModal,
   CModalBody,
   CModalFooter,
@@ -52,6 +54,7 @@ const Composer = () => {
 
   const fetchComposers = async () => {
     setLoading(true)
+    setError(false)
     try {
       const response = await axios.get(API_URL)
       setComposers(response.data)
@@ -66,9 +69,12 @@ const Composer = () => {
   const searchComposer = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
     setLoading(true)
+    setError(false)
 
     try {
-      const response = await axios.get(`${API_URL}?search=${searchQuery}`)
+      const response = await axios.get(API_URL, {
+        params: { search: searchQuery },
+      })
       setComposers(response.data)
     } catch (err) {
       setError('Failed to search composers')
@@ -138,15 +144,15 @@ const Composer = () => {
             <CRow>
               <CForm className="row ms-2 gy-1 gx-3 align-items-center" onSubmit={searchComposer}>
                 <CCol xs="auto">
-                  <CFormLabel>Composer</CFormLabel>
-                </CCol>
-                <CCol xs="auto">
-                  <CFormInput
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border border-primary"
-                  />
+                  <CInputGroup>
+                    <CInputGroupText>Composer</CInputGroupText>
+                    <CFormInput
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="border border-primary"
+                    />
+                  </CInputGroup>
                 </CCol>
                 <CCol xs="auto">
                   <CButton color="primary" type="submit">
@@ -169,16 +175,16 @@ const Composer = () => {
         </CCard>
         <CCard className="mb-4 border-primary border-2">
           <CCardBody>
-            <CTable bordered striped hover style={{ width: '1000px' }} className="border-info">
-              <CTableHead color="primary" className=" border-2">
+            <CTable bordered striped hover style={{ width: 'auto' }} className="border-info">
+              <CTableHead color="info" className=" border-2">
                 <CTableRow>
-                  <CTableHeaderCell scope="col" className="col-4 text-center">
+                  <CTableHeaderCell scope="col" style={{ width: '300px' }} className="text-center">
                     Name
                   </CTableHeaderCell>
-                  <CTableHeaderCell scope="col" className="col-6 text-center">
+                  <CTableHeaderCell scope="col" style={{ width: '500px' }} className="text-center">
                     Full Name
                   </CTableHeaderCell>
-                  <CTableHeaderCell scope="col" className="col-2 text-center">
+                  <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
                     Actions
                   </CTableHeaderCell>
                 </CTableRow>
