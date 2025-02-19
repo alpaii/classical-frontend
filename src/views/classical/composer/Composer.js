@@ -25,13 +25,15 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilPlus, cilPencil, cilX } from '@coreui/icons'
-// import { set } from '@core-js/core/dict'
+import ErrorModal from '../../../components/custom/ErrorModal' // ✅ 모달 컴포넌트 불러오기
 
 const API_URL = 'http://127.0.0.1:8000/api/composers/'
 
 const Composer = () => {
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [modalErrorVisible, setModalErrorVisible] = useState(false)
+  const [errorMessage, setErrorMessage] = useState({ title: '', content: '' })
+
   const [composers, setComposers] = useState([]) // composer list
 
   const [addComposer, setAddComposer] = useState({ name: '', full_name: '' }) // add new
@@ -54,12 +56,15 @@ const Composer = () => {
 
   const fetchComposers = async () => {
     setLoading(true)
-    setError(false)
     try {
       const response = await axios.get(API_URL)
       setComposers(response.data)
     } catch (err) {
-      setError('Failed to load composers')
+      setErrorMessage({
+        title: 'Failed to load composers',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     } finally {
       setLoading(false)
     }
@@ -69,7 +74,6 @@ const Composer = () => {
   const searchComposer = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
     setLoading(true)
-    setError(false)
 
     try {
       const response = await axios.get(API_URL, {
@@ -77,7 +81,11 @@ const Composer = () => {
       })
       setComposers(response.data)
     } catch (err) {
-      setError('Failed to search composers')
+      setErrorMessage({
+        title: 'Failed to search composers',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     } finally {
       setLoading(false)
     }
@@ -110,7 +118,11 @@ const Composer = () => {
       setModalAddVisible(false)
       setAddComposer({ name: '', full_name: '' }) // 입력 필드 초기화
     } catch (err) {
-      alert('Failed to add composer')
+      setErrorMessage({
+        title: 'Failed to add composers',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     }
   }
 
@@ -121,7 +133,11 @@ const Composer = () => {
       fetchComposers() // 목록 갱신
       setModalUpdateVisible(false)
     } catch (err) {
-      alert('Failed to update composer')
+      setErrorMessage({
+        title: 'Failed to update composers',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     }
   }
 
@@ -132,7 +148,11 @@ const Composer = () => {
       fetchComposers() // 목록 갱신
       setModalDeleteVisible(false)
     } catch (err) {
-      alert('Failed to delete composer')
+      setErrorMessage({
+        title: 'Failed to delete composers',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     }
   }
 
@@ -198,19 +218,8 @@ const Composer = () => {
                     </CTableDataCell>
                   </CTableRow>
                 )}
-
-                {/* ✅ 에러 발생 시 메시지 */}
-                {error && (
-                  <CTableRow>
-                    <CTableDataCell colSpan={3} className="text-center text-danger">
-                      {error}
-                    </CTableDataCell>
-                  </CTableRow>
-                )}
-
                 {/* ✅ 서버에서 가져온 작곡가 목록 */}
                 {!loading &&
-                  !error &&
                   composers.map((composer) => (
                     <CTableRow key={composer.id}>
                       <CTableDataCell className="table-cell-wrap">{composer.name}</CTableDataCell>
@@ -335,6 +344,14 @@ const Composer = () => {
           </CButton>
         </CModalFooter>
       </CModal>
+
+      {/* 오류 모달 */}
+      <ErrorModal
+        visible={modalErrorVisible}
+        onClose={() => setModalErrorVisible(false)}
+        title={errorMessage.title}
+        content={errorMessage.content}
+      />
     </CRow>
   )
 }
