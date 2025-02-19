@@ -11,6 +11,8 @@ import {
   CFormInput,
   CFormLabel,
   CFormSelect,
+  CInputGroup,
+  CInputGroupText,
   CModal,
   CModalBody,
   CModalFooter,
@@ -45,6 +47,7 @@ const Performer = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [performers, setPerformers] = useState([]) // 연주자 목록
+  const [selectedRole, setSelectedRole] = useState('') // 선택한 작곡가
 
   const [addPerformer, setAddPerformer] = useState({ name: '', full_name: '', role: 'Conductor' }) // 새 연주자 입력
   const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
@@ -56,9 +59,6 @@ const Performer = () => {
 
   const [deletePerformer, setDeletePerformer] = useState({ id: '' }) // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
-
-  const [editingId, setEditingId] = useState(null) // 현재 편집 중인 연주자 ID
-  const [editedPerformer, setEditedPerformer] = useState({ name: '', full_name: '', role: '' }) // 편집 중인 데이터
 
   const [searchQuery, setSearchQuery] = useState('') // search
 
@@ -84,7 +84,10 @@ const Performer = () => {
     setLoading(true)
 
     try {
-      const response = await axios.get(`${API_URL}?search=${searchQuery}`)
+      console.log('selectedRole:', selectedRole)
+      const response = await axios.get(API_URL, {
+        params: { role: selectedRole, search: searchQuery },
+      })
       setPerformers(response.data['results'])
     } catch (err) {
       setError('Failed to search performers')
@@ -154,15 +157,32 @@ const Performer = () => {
             <CRow>
               <CForm className="row ms-2 gy-1 gx-3 align-items-center" onSubmit={searchPerformer}>
                 <CCol xs="auto">
-                  <CFormLabel>Performer</CFormLabel>
+                  <CInputGroup>
+                    <CInputGroupText>Role</CInputGroupText>
+                    <CFormSelect
+                      value={selectedRole}
+                      onChange={(e) => setSelectedRole(e.target.value)}
+                      className="border border-dark"
+                    >
+                      <option value="">All</option>
+                      {ROLE_CHOICES.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </CFormSelect>
+                  </CInputGroup>
                 </CCol>
                 <CCol xs="auto">
-                  <CFormInput
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border border-primary"
-                  />
+                  <CInputGroup>
+                    <CInputGroupText>Performer</CInputGroupText>
+                    <CFormInput
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="border border-primary"
+                    />
+                  </CInputGroup>
                 </CCol>
                 <CCol xs="auto">
                   <CButton color="primary" type="submit">
@@ -226,7 +246,7 @@ const Performer = () => {
                   <CTableRow key={performer.id}>
                     <CTableDataCell>{performer.name}</CTableDataCell>
                     <CTableDataCell>{performer.full_name}</CTableDataCell>
-                    <CTableDataCell>{performer.role}</CTableDataCell>
+                    <CTableDataCell className="text-center">{performer.role}</CTableDataCell>
                     <CTableDataCell className="text-center">
                       <CButton
                         color="info"
