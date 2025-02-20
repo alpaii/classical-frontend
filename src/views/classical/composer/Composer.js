@@ -28,9 +28,10 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilPlus, cilPencil, cilX } from '@coreui/icons'
 import ErrorModal from '../../../components/custom/ErrorModal' // ✅ 모달 컴포넌트 불러오기
+import Pagination from '../../../components/custom/Pagination' // ✅ 페이지네이션 컴포넌트 불러오기
 
 const API_URL = 'http://127.0.0.1:8000/api/composers/'
-const PAGE_SIZE = 20
+const PAGE_SIZE = 5
 
 const Composer = () => {
   const [loading, setLoading] = useState(true)
@@ -38,7 +39,8 @@ const Composer = () => {
   const [errorMessage, setErrorMessage] = useState({ title: '', content: '' })
 
   const [composers, setComposers] = useState([]) // composer list
-  const [count, setCount] = useState(0) // 전체 데이터 개수
+  const [totalDataCount, setTotalDataCount] = useState(0) // 전체 데이터 개수
+  const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
   const [nextPage, setNextPage] = useState(null) // 다음 페이지 URL
   const [prevPage, setPrevPage] = useState(null) // 이전 페이지 URL
   const [requestPar, setRequestPar] = useState({ page: 1, search: '' }) // add new
@@ -58,7 +60,7 @@ const Composer = () => {
 
   // ✅ useCallback을 사용하여 함수가 불필요하게 새로 생성되지 않도록 함
   const fetchComposers = useCallback(async () => {
-    setLoading(true)
+    // setLoading(true)
     try {
       const response = await axios.get(
         API_URL,
@@ -66,8 +68,10 @@ const Composer = () => {
           params: { search: requestPar.search, page: requestPar.page }, // 검색어와 페이지 번호를 전달
         }, // 검색어와 페이지 번호를 전달
       )
+
       setComposers(response.data.results)
-      setCount(response.data.count)
+      setTotalDataCount(response.data.count)
+      setTotalPageCount(Math.ceil(response.data.count / PAGE_SIZE))
       setNextPage(response.data.next)
       setPrevPage(response.data.previous)
     } catch (err) {
@@ -87,8 +91,8 @@ const Composer = () => {
   }, [fetchComposers])
 
   const handlePageChange = (page) => {
-    if (page < 1 || page > Math.ceil(count / PAGE_SIZE)) return // 페이지 범위 초과 방지
-    setRequestPar((prev) => ({ ...prev, page: page })) // 페이지 번호 변경
+    if (page < 1 || page > totalPageCount) return // 페이지 범위 초과 방지
+    setRequestPar((prev) => ({ ...prev, page }))
   }
 
   // 📌 Composer 검색 기능
@@ -268,35 +272,12 @@ const Composer = () => {
             </CTable>
             <CRow>
               <CCol xs="auto">
-                {/* ✅ CoreUI 페이지네이션 */}
-                <CPagination align="center" className="mt-3">
-                  <CPaginationItem
-                    disabled={!prevPage}
-                    onClick={() => handlePageChange(requestPar.page - 1)}
-                    className="custom-pointer"
-                  >
-                    &laquo; Prev
-                  </CPaginationItem>
-
-                  {Array.from({ length: Math.ceil(count / PAGE_SIZE) }, (_, i) => (
-                    <CPaginationItem
-                      key={i + 1}
-                      active={i + 1 === requestPar.page}
-                      onClick={() => handlePageChange(i + 1)}
-                      className="custom-pointer"
-                    >
-                      {i + 1}
-                    </CPaginationItem>
-                  ))}
-
-                  <CPaginationItem
-                    disabled={!nextPage}
-                    onClick={() => handlePageChange(requestPar.page + 1)}
-                    className="custom-pointer"
-                  >
-                    Next &raquo;
-                  </CPaginationItem>
-                </CPagination>
+                {/* ✅ 페이지네이션 추가 */}
+                <Pagination
+                  currentPage={requestPar.page}
+                  totalPageCount={totalPageCount}
+                  onPageChange={handlePageChange}
+                />
               </CCol>
             </CRow>
           </CCardBody>
