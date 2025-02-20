@@ -66,6 +66,7 @@ body {
   }
 }
 
+// Custom styles
 .bg-primary-light {
   background-color: rgba(13, 110, 253, 0.3) !important;
 }
@@ -101,4 +102,8 @@ body {
 .table-cell-wrap {
   word-break: break-word; 
   white-space: normal;
+}
+
+.custom-pointer {
+  cursor: pointer !important;
 }

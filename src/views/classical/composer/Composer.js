@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import axios from 'axios'
 import {
   CRow,
@@ -22,12 +22,15 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CPagination,
+  CPaginationItem,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilPlus, cilPencil, cilX } from '@coreui/icons'
 import ErrorModal from '../../../components/custom/ErrorModal' // ✅ 모달 컴포넌트 불러오기
 
 const API_URL = 'http://127.0.0.1:8000/api/composers/'
+const PAGE_SIZE = 20
 
 const Composer = () => {
   const [loading, setLoading] = useState(true)
@@ -35,6 +38,10 @@ const Composer = () => {
   const [errorMessage, setErrorMessage] = useState({ title: '', content: '' })
 
   const [composers, setComposers] = useState([]) // composer list
+  const [count, setCount] = useState(0) // 전체 데이터 개수
+  const [nextPage, setNextPage] = useState(null) // 다음 페이지 URL
+  const [prevPage, setPrevPage] = useState(null) // 이전 페이지 URL
+  const [requestPar, setRequestPar] = useState({ page: 1, search: '' }) // add new
 
   const [addComposer, setAddComposer] = useState({ name: '', full_name: '' }) // add new
   const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
@@ -49,16 +56,20 @@ const Composer = () => {
 
   const [searchQuery, setSearchQuery] = useState('') // search
 
-  // 📌 서버에서 데이터 가져오기
-  useEffect(() => {
-    fetchComposers()
-  }, [])
-
-  const fetchComposers = async () => {
+  // ✅ useCallback을 사용하여 함수가 불필요하게 새로 생성되지 않도록 함
+  const fetchComposers = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await axios.get(API_URL)
-      setComposers(response.data)
+      const response = await axios.get(
+        API_URL,
+        {
+          params: { search: requestPar.search, page: requestPar.page }, // 검색어와 페이지 번호를 전달
+        }, // 검색어와 페이지 번호를 전달
+      )
+      setComposers(response.data.results)
+      setCount(response.data.count)
+      setNextPage(response.data.next)
+      setPrevPage(response.data.previous)
     } catch (err) {
       setErrorMessage({
         title: 'Failed to load composers',
@@ -68,27 +79,22 @@ const Composer = () => {
     } finally {
       setLoading(false)
     }
+  }, [requestPar]) // ✅ useCallback에 의존성 추가
+
+  // 📌 서버에서 데이터 가져오기
+  useEffect(() => {
+    fetchComposers()
+  }, [fetchComposers])
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > Math.ceil(count / PAGE_SIZE)) return // 페이지 범위 초과 방지
+    setRequestPar((prev) => ({ ...prev, page: page })) // 페이지 번호 변경
   }
 
   // 📌 Composer 검색 기능
   const searchComposer = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
-    setLoading(true)
-
-    try {
-      const response = await axios.get(API_URL, {
-        params: { search: searchQuery },
-      })
-      setComposers(response.data)
-    } catch (err) {
-      setErrorMessage({
-        title: 'Failed to search composers',
-        content: err.message,
-      })
-      setModalErrorVisible(true)
-    } finally {
-      setLoading(false)
-    }
+    setRequestPar({ page: 1, search: searchQuery.trim() }) // 페이지 번호 변경
   }
 
   // 📌 Add 모달이 열릴 때 name input에 자동 포커스
@@ -260,6 +266,39 @@ const Composer = () => {
                   ))}
               </CTableBody>
             </CTable>
+            <CRow>
+              <CCol xs="auto">
+                {/* ✅ CoreUI 페이지네이션 */}
+                <CPagination align="center" className="mt-3">
+                  <CPaginationItem
+                    disabled={!prevPage}
+                    onClick={() => handlePageChange(requestPar.page - 1)}
+                    className="custom-pointer"
+                  >
+                    &laquo; Prev
+                  </CPaginationItem>
+
+                  {Array.from({ length: Math.ceil(count / PAGE_SIZE) }, (_, i) => (
+                    <CPaginationItem
+                      key={i + 1}
+                      active={i + 1 === requestPar.page}
+                      onClick={() => handlePageChange(i + 1)}
+                      className="custom-pointer"
+                    >
+                      {i + 1}
+                    </CPaginationItem>
+                  ))}
+
+                  <CPaginationItem
+                    disabled={!nextPage}
+                    onClick={() => handlePageChange(requestPar.page + 1)}
+                    className="custom-pointer"
+                  >
+                    Next &raquo;
+                  </CPaginationItem>
+                </CPagination>
+              </CCol>
+            </CRow>
           </CCardBody>
         </CCard>
       </CCol>
