@@ -31,7 +31,7 @@ import ErrorModal from '../../../components/custom/ErrorModal' // ✅ 모달 컴
 import Pagination from '../../../components/custom/Pagination' // ✅ 페이지네이션 컴포넌트 불러오기
 
 const API_URL = 'http://127.0.0.1:8000/api/composers/'
-const PAGE_SIZE = 5
+const PAGE_SIZE = 20
 
 const Composer = () => {
   const [loading, setLoading] = useState(true)
@@ -60,7 +60,7 @@ const Composer = () => {
 
   // ✅ useCallback을 사용하여 함수가 불필요하게 새로 생성되지 않도록 함
   const fetchComposers = useCallback(async () => {
-    // setLoading(true)
+    const loadingTimeout = setTimeout(() => setLoading(true), 100)
     try {
       const response = await axios.get(
         API_URL,
@@ -68,6 +68,7 @@ const Composer = () => {
           params: { search: requestPar.search, page: requestPar.page }, // 검색어와 페이지 번호를 전달
         }, // 검색어와 페이지 번호를 전달
       )
+      clearTimeout(loadingTimeout)
 
       setComposers(response.data.results)
       setTotalDataCount(response.data.count)
@@ -75,6 +76,7 @@ const Composer = () => {
       setNextPage(response.data.next)
       setPrevPage(response.data.previous)
     } catch (err) {
+      clearTimeout(loadingTimeout)
       setErrorMessage({
         title: 'Failed to load composers',
         content: err.message,
