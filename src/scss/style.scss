@@ -67,6 +67,14 @@ body {
 }
 
 // Custom styles
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+body {
+  font-family: 'Roboto', 'Noto Sans KR', sans-serif;
+  font-size: 1.1rem; /* ✅ 기본 폰트 크기를 20% 증가 (16px → 19.2px) */
+}
+
 .bg-primary-light {
   background-color: rgba(13, 110, 253, 0.3) !important;
 }

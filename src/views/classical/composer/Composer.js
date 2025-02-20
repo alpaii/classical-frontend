@@ -39,10 +39,7 @@ const Composer = () => {
   const [errorMessage, setErrorMessage] = useState({ title: '', content: '' })
 
   const [composers, setComposers] = useState([]) // composer list
-  const [totalDataCount, setTotalDataCount] = useState(0) // 전체 데이터 개수
   const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
-  const [nextPage, setNextPage] = useState(null) // 다음 페이지 URL
-  const [prevPage, setPrevPage] = useState(null) // 이전 페이지 URL
   const [requestPar, setRequestPar] = useState({ page: 1, search: '' }) // add new
 
   const [addComposer, setAddComposer] = useState({ name: '', full_name: '' }) // add new
@@ -62,19 +59,15 @@ const Composer = () => {
   const fetchComposers = useCallback(async () => {
     const loadingTimeout = setTimeout(() => setLoading(true), 100)
     try {
-      const response = await axios.get(
-        API_URL,
-        {
-          params: { search: requestPar.search, page: requestPar.page }, // 검색어와 페이지 번호를 전달
-        }, // 검색어와 페이지 번호를 전달
-      )
+      const params = { page: requestPar.page }
+      if (requestPar.search) {
+        params.search = requestPar.search // ✅ search가 있을 때만 추가
+      }
+      const response = await axios.get(API_URL, { params })
       clearTimeout(loadingTimeout)
 
       setComposers(response.data.results)
-      setTotalDataCount(response.data.count)
       setTotalPageCount(Math.ceil(response.data.count / PAGE_SIZE))
-      setNextPage(response.data.next)
-      setPrevPage(response.data.previous)
     } catch (err) {
       clearTimeout(loadingTimeout)
       setErrorMessage({
@@ -207,8 +200,8 @@ const Composer = () => {
         </CCard>
         <CCard className="mb-4 border-primary border-2">
           <CCardBody>
-            <CTable bordered striped hover style={{ width: 'auto' }} className="border-info">
-              <CTableHead color="info" className=" border-2">
+            <CTable bordered striped hover style={{ width: 'auto' }} className="border-success">
+              <CTableHead color="success" className="border-2">
                 <CTableRow>
                   <CTableHeaderCell scope="col" style={{ width: '300px' }} className="text-center">
                     Name
