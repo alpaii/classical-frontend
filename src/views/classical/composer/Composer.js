@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import {
   CRow,
@@ -33,13 +33,21 @@ const API_URL = 'http://127.0.0.1:8000/api/composers/'
 const PAGE_SIZE = 20
 
 const Composer = () => {
+  const navigate = useNavigate() // ✅ 페이지 이동 함수
+  const location = useLocation()
+  const composerPage = location.state?.page || 1
+  const composerSearch = location.state?.search || ''
+
   const [loading, setLoading] = useState(true)
   const [modalErrorVisible, setModalErrorVisible] = useState(false)
   const [errorMessage, setErrorMessage] = useState({ title: '', content: '' })
 
   const [composers, setComposers] = useState([]) // composer list
   const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
-  const [requestPar, setRequestPar] = useState({ page: 1, search: '' }) // add new
+  const [requestPar, setRequestPar] = useState({
+    page: composerPage,
+    search: composerSearch,
+  })
 
   const [addComposer, setAddComposer] = useState({ name: '', full_name: '' }) // add new
   const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
@@ -52,9 +60,7 @@ const Composer = () => {
   const [deleteComposer, setDeleteComposer] = useState() // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
-  const [searchQuery, setSearchQuery] = useState('') // search
-
-  const navigate = useNavigate() // ✅ 페이지 이동 함수
+  const [searchQuery, setSearchQuery] = useState(composerSearch) // search
 
   // ✅ useCallback을 사용하여 함수가 불필요하게 새로 생성되지 않도록 함
   const fetchComposers = useCallback(async () => {
@@ -247,12 +253,16 @@ const Composer = () => {
                                 state: {
                                   composerId: composer.id,
                                   composerName: composer.full_name,
+                                  composerPage: requestPar.page,
+                                  composerSearch: requestPar.search,
                                 },
                               })
                             }}
+                            className="p-0"
                             style={{ width: '50px', textAlign: 'center' }} // ✅ 버튼 크기 고정
                           >
-                            {composer.work_count}
+                            <span style={{ fontSize: '1.1rem' }}>{composer.work_count}</span>
+                            {/* {composer.work_count} */}
                           </CButton>
                         )}
                       </CTableDataCell>

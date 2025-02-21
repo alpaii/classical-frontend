@@ -28,12 +28,19 @@ import {
   CTableRow,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilPlus, cilPencil, cilX, cilCheck, cilMedicalCross, cilReload } from '@coreui/icons'
+import { cilPlus, cilPencil, cilX, cilChevronLeft } from '@coreui/icons'
 
 const API_COMPOSERS = 'http://127.0.0.1:8000/api/composers/' // Composer API
 const API_WORKS = 'http://127.0.0.1:8000/api/works/' // Work API
 
 const Work = () => {
+  const navigate = useNavigate() // ✅ 페이지 이동 함수
+  const location = useLocation()
+  const composerId = location.state?.composerId || null // ✅ 전달된 composerId 받기
+  const composerName = location.state?.composerName || null // ✅ 전달된 composerId 받기
+  const composerPage = location.state?.composerPage || null // ✅ 전달된 composerId 받기
+  const composerSearch = location.state?.composerSearch || null // ✅ 전달된 composerId 받기
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [composers, setComposers] = useState([]) // 작곡가 목록
@@ -52,11 +59,6 @@ const Work = () => {
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
   const [searchQuery, setSearchQuery] = useState('') // search
-
-  const navigate = useNavigate() // ✅ 페이지 이동 함수
-  const location = useLocation()
-  const composerId = location.state?.composerId || null // ✅ 전달된 composerId 받기
-  const composerName = location.state?.composerName || null // ✅ 전달된 composerId 받기
 
   // 📌 선택한 Composer의 Work 목록 가져오기
   const fetchWorks = useCallback(async () => {
@@ -202,6 +204,27 @@ const Work = () => {
             </CRow>
           </CCardBody>
         </CCard>
+
+        <CCol xs="auto" className="ms-2 mb-2">
+          <CButton
+            color="info"
+            className="text-white"
+            onClick={() => {
+              console.log('page : ' + composerPage)
+              console.log('search : ' + composerSearch)
+              navigate('/classical/composer', {
+                state: {
+                  page: composerPage,
+                  search: composerSearch,
+                },
+              })
+            }}
+          >
+            <CIcon icon={cilChevronLeft} size="l" className="me-2" />
+            Back to Composer
+          </CButton>
+        </CCol>
+
         <CCard className="mb-4 border-primary border-2">
           <CCardBody>
             <CTable bordered striped hover style={{ width: '1000px' }} className="border-info">
