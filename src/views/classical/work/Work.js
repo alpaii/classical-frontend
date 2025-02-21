@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+
 import axios from 'axios'
 import {
   CRow,
@@ -51,33 +53,13 @@ const Work = () => {
 
   const [searchQuery, setSearchQuery] = useState('') // search
 
-  useEffect(() => {
-    fetchComposers()
-  }, [])
-
-  useEffect(() => {
-    if (selectedComposer) {
-      fetchWorks(selectedComposer)
-    } else {
-      setWorks([])
-    }
-  }, [selectedComposer])
-
-  // 📌 Composer 목록 가져오기
-  const fetchComposers = async () => {
-    setLoading(true)
-    try {
-      const response = await axios.get(API_COMPOSERS)
-      setComposers(response.data)
-    } catch (err) {
-      setError('Failed to load composers')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const navigate = useNavigate() // ✅ 페이지 이동 함수
+  const location = useLocation()
+  const composerId = location.state?.composerId || null // ✅ 전달된 composerId 받기
+  const composerName = location.state?.composerName || null // ✅ 전달된 composerId 받기
 
   // 📌 선택한 Composer의 Work 목록 가져오기
-  const fetchWorks = async (composerId) => {
+  const fetchWorks = useCallback(async () => {
     setLoading(true)
     try {
       const response = await axios.get(API_WORKS, {
@@ -91,9 +73,13 @@ const Work = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [composerId]) // ✅ useCallback에 의존성 추가
 
-  // 📌 Composer 검색 기능
+  useEffect(() => {
+    fetchWorks()
+  }, [fetchWorks])
+
+  // 📌 Work 검색 기능
   const searchWork = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
     setLoading(true)
@@ -101,7 +87,7 @@ const Work = () => {
     try {
       const response = await axios.get(API_WORKS, {
         params: {
-          composer: selectedComposer,
+          composer: composerId,
           search: searchQuery,
         },
       })
@@ -129,14 +115,14 @@ const Work = () => {
 
   // 📌 새로운 Work 추가
   const runAddWork = async () => {
-    if (!addWork.work_no || !addWork.name || !selectedComposer) {
+    if (!addWork.work_no || !addWork.name || !composerId) {
       alert('Please enter all fields')
       return
     }
 
     try {
-      await axios.post(API_WORKS, { ...addWork, composer: selectedComposer })
-      fetchWorks(selectedComposer) // 목록 다시 불러오기
+      await axios.post(API_WORKS, { ...addWork, composer: composerId })
+      fetchWorks() // 목록 다시 불러오기
       setModalAddVisible(false)
       setAddWork({ work_no: '', name: '' }) // 입력 필드 초기화
     } catch (err) {
@@ -148,7 +134,7 @@ const Work = () => {
   const runUpdateWork = async () => {
     try {
       await axios.put(`${API_WORKS}${updateWork.id}/`, updateWork)
-      fetchWorks(selectedComposer) // 목록 갱신
+      fetchWorks() // 목록 갱신
       setModalUpdateVisible(false)
     } catch (err) {
       alert('Failed to update work')
@@ -159,7 +145,7 @@ const Work = () => {
   const runDeleteWork = async (id) => {
     try {
       await axios.delete(`${API_WORKS}${deleteWork.id}/`)
-      fetchWorks(selectedComposer)
+      fetchWorks()
       setModalDeleteVisible(false)
     } catch (err) {
       alert('Failed to delete work')
@@ -175,23 +161,19 @@ const Work = () => {
               <CForm className="row ms-2 gy-1 gx-3 align-items-center" onSubmit={searchWork}>
                 <CCol xs="auto">
                   <CInputGroup>
-                    <CInputGroupText>Composer</CInputGroupText>
-                    <CFormSelect
-                      value={selectedComposer}
-                      onChange={(e) => setSelectedComposer(e.target.value)}
-                    >
-                      <option value="">All</option>
-                      {composers.map((composer) => (
-                        <option key={composer.id} value={composer.id}>
-                          {composer.name}
-                        </option>
-                      ))}
-                    </CFormSelect>
+                    <CInputGroupText className="border border-primary">Composer</CInputGroupText>
+                    <CFormInput
+                      type="text"
+                      value={composerName}
+                      disabled
+                      className="border border-primary"
+                      style={{ width: '300px' }}
+                    />
                   </CInputGroup>
                 </CCol>
                 <CCol xs="auto">
                   <CInputGroup>
-                    <CInputGroupText>Work No.</CInputGroupText>
+                    <CInputGroupText className="border border-primary">Work No.</CInputGroupText>
                     <CFormInput
                       type="text"
                       value={searchQuery}

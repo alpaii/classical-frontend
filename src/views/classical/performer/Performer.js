@@ -185,11 +185,11 @@ const Performer = () => {
               <CForm className="row ms-2 gy-1 gx-3 align-items-center" onSubmit={searchPerformer}>
                 <CCol xs="auto">
                   <CInputGroup>
-                    <CInputGroupText>Role</CInputGroupText>
+                    <CInputGroupText className="border border-primary">Role</CInputGroupText>
                     <CFormSelect
                       value={selectedRole}
                       onChange={(e) => setSelectedRole(e.target.value)}
-                      className="border border-dark"
+                      className="border border-primary"
                     >
                       <option value="">All</option>
                       {ROLE_CHOICES.map((role) => (
@@ -202,7 +202,7 @@ const Performer = () => {
                 </CCol>
                 <CCol xs="auto">
                   <CInputGroup>
-                    <CInputGroupText>Performer</CInputGroupText>
+                    <CInputGroupText className="border border-primary">Performer</CInputGroupText>
                     <CFormInput
                       type="text"
                       value={searchQuery}

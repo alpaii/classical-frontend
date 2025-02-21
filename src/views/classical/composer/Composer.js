@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   CRow,
@@ -52,6 +53,8 @@ const Composer = () => {
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
   const [searchQuery, setSearchQuery] = useState('') // search
+
+  const navigate = useNavigate() // ✅ 페이지 이동 함수
 
   // ✅ useCallback을 사용하여 함수가 불필요하게 새로 생성되지 않도록 함
   const fetchComposers = useCallback(async () => {
@@ -168,7 +171,7 @@ const Composer = () => {
               <CForm className="row ms-2 gy-1 gx-3 align-items-center" onSubmit={searchComposer}>
                 <CCol xs="auto">
                   <CInputGroup>
-                    <CInputGroupText>Composer</CInputGroupText>
+                    <CInputGroupText className="border border-primary">Composer</CInputGroupText>
                     <CFormInput
                       type="text"
                       value={searchQuery}
@@ -207,6 +210,9 @@ const Composer = () => {
                   <CTableHeaderCell scope="col" style={{ width: '500px' }} className="text-center">
                     Full Name
                   </CTableHeaderCell>
+                  <CTableHeaderCell scope="col" style={{ width: '150px' }} className="text-center">
+                    Work Count
+                  </CTableHeaderCell>
                   <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
                     Actions
                   </CTableHeaderCell>
@@ -228,6 +234,27 @@ const Composer = () => {
                       <CTableDataCell className="table-cell-wrap">{composer.name}</CTableDataCell>
                       <CTableDataCell className="table-cell-wrap">
                         {composer.full_name}
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        {composer.work_count === 0 ? (
+                          '-'
+                        ) : (
+                          <CButton
+                            color="warning"
+                            size="sm"
+                            onClick={() => {
+                              navigate('/classical/work', {
+                                state: {
+                                  composerId: composer.id,
+                                  composerName: composer.full_name,
+                                },
+                              })
+                            }}
+                            style={{ width: '50px', textAlign: 'center' }} // ✅ 버튼 크기 고정
+                          >
+                            {composer.work_count}
+                          </CButton>
+                        )}
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
                         <CButton
