@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import axios from 'axios'
 import {
   CRow,
   CCol,
   CCard,
-  CCardHeader,
   CCardBody,
   CButton,
   CForm,
@@ -27,8 +26,11 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilPlus, cilPencil, cilX, cilCheck, cilMedicalCross, cilReload } from '@coreui/icons'
+import ErrorModal from '../../../components/custom/ErrorModal' // ✅ 모달 컴포넌트 불러오기
+import Pagination from '../../../components/custom/Pagination' // ✅ 페이지네이션 컴포넌트 불러오기
 
 const API_URL = 'http://127.0.0.1:8000/api/performers/' // ✅ Performer API URL
+const PAGE_SIZE = 20
 
 const ROLE_CHOICES = [
   'Conductor',
@@ -45,9 +47,12 @@ const ROLE_CHOICES = [
 
 const Performer = () => {
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [modalErrorVisible, setModalErrorVisible] = useState(false)
+  const [errorMessage, setErrorMessage] = useState({ title: '', content: '' })
+
   const [performers, setPerformers] = useState([]) // 연주자 목록
-  const [selectedRole, setSelectedRole] = useState('') // 선택한 작곡가
+  const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
+  const [requestPar, setRequestPar] = useState({ page: 1, search: '' }) // add new
 
   const [addPerformer, setAddPerformer] = useState({ name: '', full_name: '', role: 'Conductor' }) // 새 연주자 입력
   const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
@@ -60,40 +65,50 @@ const Performer = () => {
   const [deletePerformer, setDeletePerformer] = useState({ id: '' }) // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
+  const [selectedRole, setSelectedRole] = useState('') // 선택한 Role
   const [searchQuery, setSearchQuery] = useState('') // search
 
-  useEffect(() => {
-    fetchPerformers()
-  }, [])
-
-  const fetchPerformers = async () => {
-    setLoading(true)
+  // ✅ useCallback을 사용하여 함수가 불필요하게 새로 생성되지 않도록 함
+  const fetchPerformers = useCallback(async () => {
+    const loadingTimeout = setTimeout(() => setLoading(true), 100)
     try {
-      const response = await axios.get(API_URL)
-      setPerformers(response.data['results'])
+      const params = { page: requestPar.page }
+      if (requestPar.search) {
+        params.search = requestPar.search // ✅ search가 있을 때만 추가
+      }
+      if (requestPar.role) {
+        params.role = requestPar.role // ✅ role이 있을 때만 추가
+      }
+      const response = await axios.get(API_URL, { params })
+      clearTimeout(loadingTimeout)
+
+      setPerformers(response.data.results)
+      setTotalPageCount(Math.ceil(response.data.count / PAGE_SIZE))
     } catch (err) {
-      setError('Failed to load performers')
+      clearTimeout(loadingTimeout)
+      setErrorMessage({
+        title: 'Failed to load performers',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     } finally {
       setLoading(false)
     }
+  }, [requestPar]) // ✅ useCallback에 의존성 추가
+
+  useEffect(() => {
+    fetchPerformers()
+  }, [fetchPerformers])
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPageCount) return // 페이지 범위 초과 방지
+    setRequestPar((prev) => ({ ...prev, page }))
   }
 
   // 📌 Performer 검색 기능
   const searchPerformer = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
-    setLoading(true)
-
-    try {
-      console.log('selectedRole:', selectedRole)
-      const response = await axios.get(API_URL, {
-        params: { role: selectedRole, search: searchQuery },
-      })
-      setPerformers(response.data['results'])
-    } catch (err) {
-      setError('Failed to search performers')
-    } finally {
-      setLoading(false)
-    }
+    setRequestPar({ page: 1, search: searchQuery.trim(), role: selectedRole }) // 페이지 번호 변경
   }
 
   // 📌 Add 모달이 열릴 때 name input에 자동 포커스
@@ -123,7 +138,11 @@ const Performer = () => {
       setModalAddVisible(false)
       setAddPerformer({ name: '', full_name: '', role: 'Conductor' }) // 입력 필드 초기화
     } catch (err) {
-      alert('Failed to add performer')
+      setErrorMessage({
+        title: 'Failed to add performers',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     }
   }
 
@@ -134,7 +153,11 @@ const Performer = () => {
       fetchPerformers()
       setModalUpdateVisible(false)
     } catch (err) {
-      alert('Failed to update performer')
+      setErrorMessage({
+        title: 'Failed to update performer',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     }
   }
 
@@ -145,7 +168,11 @@ const Performer = () => {
       fetchPerformers()
       setModalDeleteVisible(false)
     } catch (err) {
-      alert('Failed to delete performer')
+      setErrorMessage({
+        title: 'Failed to delete performers',
+        content: err.message,
+      })
+      setModalErrorVisible(true)
     }
   }
 
@@ -231,21 +258,13 @@ const Performer = () => {
                     </CTableDataCell>
                   </CTableRow>
                 )}
-
-                {/* ✅ 에러 발생 시 메시지 */}
-                {error && (
-                  <CTableRow>
-                    <CTableDataCell colSpan={4} className="text-center text-danger">
-                      {error}
-                    </CTableDataCell>
-                  </CTableRow>
-                )}
-
                 {/* ✅ 서버에서 가져온 Performer 목록 */}
                 {performers.map((performer) => (
                   <CTableRow key={performer.id}>
-                    <CTableDataCell>{performer.name}</CTableDataCell>
-                    <CTableDataCell>{performer.full_name}</CTableDataCell>
+                    <CTableDataCell className="table-cell-wrap">{performer.name}</CTableDataCell>
+                    <CTableDataCell className="table-cell-wrap">
+                      {performer.full_name}
+                    </CTableDataCell>
                     <CTableDataCell className="text-center">{performer.role}</CTableDataCell>
                     <CTableDataCell className="text-center">
                       <CButton
@@ -282,6 +301,16 @@ const Performer = () => {
                 ))}
               </CTableBody>
             </CTable>
+            <CRow>
+              <CCol xs="auto">
+                {/* ✅ 페이지네이션 추가 */}
+                <Pagination
+                  currentPage={requestPar.page}
+                  totalPageCount={totalPageCount}
+                  onPageChange={handlePageChange}
+                />
+              </CCol>
+            </CRow>
           </CCardBody>
         </CCard>
       </CCol>
@@ -392,6 +421,14 @@ const Performer = () => {
           </CButton>
         </CModalFooter>
       </CModal>
+
+      {/* 오류 모달 */}
+      <ErrorModal
+        visible={modalErrorVisible}
+        onClose={() => setModalErrorVisible(false)}
+        title={errorMessage.title}
+        content={errorMessage.content}
+      />
     </CRow>
   )
 }
