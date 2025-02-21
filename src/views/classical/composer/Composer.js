@@ -48,7 +48,7 @@ const Composer = () => {
   const [modalUpdateVisible, setModalUpdateVisible] = useState(false) // update modal
   const nameUpdateInputRef = useRef(null) // focus
 
-  const [deleteComposer, setDeleteComposer] = useState({ id: '' }) // delete
+  const [deleteComposer, setDeleteComposer] = useState() // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
   const [searchQuery, setSearchQuery] = useState('') // search
@@ -251,7 +251,7 @@ const Composer = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            setDeleteComposer({ id: composer.id })
+                            setDeleteComposer(composer)
                             setModalDeleteVisible(true)
                           }}
                           className="hover-white"
@@ -347,7 +347,15 @@ const Composer = () => {
 
       {/* 삭제 확인 모달 */}
       <CModal visible={modalDeleteVisible} onClose={() => setModalDeleteVisible(false)}>
-        <CModalBody>Delete this item?</CModalBody>
+        <CModalHeader>
+          <CModalTitle>Delete Composer</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <div className="mt-2">Are you sure to delete this composer?</div>
+          <div className="mb-5 mt-5 text-danger text-center">
+            <strong>{deleteComposer?.full_name || ''}</strong>
+          </div>
+        </CModalBody>
         <CModalFooter>
           <CButton color="secondary" onClick={() => setModalDeleteVisible(false)}>
             Close

@@ -62,7 +62,7 @@ const Performer = () => {
   const [modalUpdateVisible, setModalUpdateVisible] = useState(false) // update modal
   const nameUpdateInputRef = useRef(null) // focus
 
-  const [deletePerformer, setDeletePerformer] = useState({ id: '' }) // delete
+  const [deletePerformer, setDeletePerformer] = useState() // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
   const [selectedRole, setSelectedRole] = useState('') // 선택한 Role
@@ -289,7 +289,7 @@ const Performer = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setDeletePerformer({ id: performer.id })
+                          setDeletePerformer(performer)
                           setModalDeleteVisible(true)
                         }}
                         className="hover-white"
@@ -322,7 +322,19 @@ const Performer = () => {
         </CModalHeader>
         <CModalBody>
           <CForm>
-            <CFormLabel>Name</CFormLabel>
+            <CFormLabel>Role</CFormLabel>
+            <CFormSelect
+              value={addPerformer.role}
+              onChange={(e) => setAddPerformer({ ...addPerformer, role: e.target.value })}
+              className="border border-dark"
+            >
+              {ROLE_CHOICES.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </CFormSelect>
+            <CFormLabel className="mt-3">Name</CFormLabel>
             <CFormInput
               ref={nameAddInputRef} // ✅ `ref`를 추가하여 자동 포커스 적용
               type="text"
@@ -337,18 +349,6 @@ const Performer = () => {
               onChange={(e) => setAddPerformer({ ...addPerformer, full_name: e.target.value })}
               className="border border-dark"
             />
-            <CFormLabel className="mt-3">Role</CFormLabel>
-            <CFormSelect
-              value={addPerformer.role}
-              onChange={(e) => setAddPerformer({ ...addPerformer, role: e.target.value })}
-              className="border border-dark"
-            >
-              {ROLE_CHOICES.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </CFormSelect>
           </CForm>
         </CModalBody>
         <CModalFooter>
@@ -368,7 +368,19 @@ const Performer = () => {
         </CModalHeader>
         <CModalBody>
           <CForm>
-            <CFormLabel>Name</CFormLabel>
+            <CFormLabel>Role</CFormLabel>
+            <CFormSelect
+              value={updatePerformer.role}
+              onChange={(e) => setUpdatePerformer({ ...updatePerformer, role: e.target.value })}
+              className="border border-dark"
+            >
+              {ROLE_CHOICES.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </CFormSelect>
+            <CFormLabel className="mt-3">Name</CFormLabel>
             <CFormInput
               ref={nameUpdateInputRef} // ✅ `ref`를 추가하여 자동 포커스 적용
               type="text"
@@ -386,18 +398,6 @@ const Performer = () => {
               className="border border-dark"
             />
           </CForm>
-          <CFormLabel className="mt-3">Role</CFormLabel>
-          <CFormSelect
-            value={updatePerformer.role}
-            onChange={(e) => setUpdatePerformer({ ...updatePerformer, role: e.target.value })}
-            className="border border-dark"
-          >
-            {ROLE_CHOICES.map((role) => (
-              <option key={role} value={role}>
-                {role}
-              </option>
-            ))}
-          </CFormSelect>
         </CModalBody>
         <CModalFooter>
           <CButton color="secondary" onClick={() => setModalUpdateVisible(false)}>
@@ -411,7 +411,15 @@ const Performer = () => {
 
       {/* 삭제 확인 모달 */}
       <CModal visible={modalDeleteVisible} onClose={() => setModalDeleteVisible(false)}>
-        <CModalBody>Delete this item?</CModalBody>
+        <CModalHeader>
+          <CModalTitle>Delete Composer</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <div className="mt-2">Are you sure to delete this performer?</div>
+          <div className="mb-5 mt-5 text-danger text-center">
+            <strong>{deletePerformer?.full_name || ''}</strong>
+          </div>
+        </CModalBody>
         <CModalFooter>
           <CButton color="secondary" onClick={() => setModalDeleteVisible(false)}>
             Close
