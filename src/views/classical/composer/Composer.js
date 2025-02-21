@@ -100,7 +100,7 @@ const Composer = () => {
   // 📌 Composer 검색 기능
   const searchComposer = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
-    setRequestPar({ page: 1, search: searchQuery.trim() }) // 페이지 번호 변경
+    setRequestPar({ page: 1, search: searchQuery.trim() }) // 검색어 적용, 페이지 초기화
   }
 
   // 📌 Add 모달이 열릴 때 name input에 자동 포커스
@@ -228,7 +228,7 @@ const Composer = () => {
                 {/* ✅ 데이터 로딩 상태 */}
                 {loading && (
                   <CTableRow>
-                    <CTableDataCell colSpan={3} className="text-center">
+                    <CTableDataCell colSpan={4} className="text-center">
                       Loading...
                     </CTableDataCell>
                   </CTableRow>
