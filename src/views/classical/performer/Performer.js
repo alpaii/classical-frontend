@@ -232,8 +232,8 @@ const Performer = () => {
         </CCard>
         <CCard className="mb-4 border-primary border-2">
           <CCardBody>
-            <CTable bordered striped hover style={{ width: 'auto' }} className="border-info">
-              <CTableHead color="info" className=" border-2">
+            <CTable bordered striped hover style={{ width: 'auto' }} className="border-success">
+              <CTableHead color="success" className=" border-2">
                 <CTableRow>
                   <CTableHeaderCell scope="col" style={{ width: '300px' }} className="text-center">
                     Name
