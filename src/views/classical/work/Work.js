@@ -12,7 +12,6 @@ import {
   CFormLabel,
   CInputGroup,
   CInputGroupText,
-  CFormSelect,
   CModal,
   CModalBody,
   CModalFooter,
@@ -40,6 +39,9 @@ const Work = () => {
   const composerName = location.state?.composerName || null // ✅ 전달된 composerId 받기
   const composerPage = location.state?.composerPage || null // ✅ 전달된 composerId 받기
   const composerSearch = location.state?.composerSearch || null // ✅ 전달된 composerId 받기
+  const workPage = location.state?.workPage || 1 // ✅ 전달된 composerId 받기
+  const workSearchWorkNo = location.state?.workSearchWorkNo || '' // ✅ 전달된 composerId 받기
+  const workSearchName = location.state?.workSearchName || '' // ✅ 전달된 composerId 받기
 
   const [loading, setLoading] = useState(true)
   const [modalErrorVisible, setModalErrorVisible] = useState(false)
@@ -48,9 +50,9 @@ const Work = () => {
   const [works, setWorks] = useState([]) // Work 목록
   const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
   const [requestPar, setRequestPar] = useState({
-    page: 1,
-    searchWorkNo: '',
-    searchName: '',
+    page: workPage,
+    searchWorkNo: workSearchWorkNo,
+    searchName: workSearchName,
   })
 
   const [addWork, setAddWork] = useState({ work_no: '', name: '' }) // 새 Work 추가 상태
@@ -86,7 +88,7 @@ const Work = () => {
     } catch (err) {
       clearTimeout(loadingTimeout)
       setErrorMessage({
-        title: 'Failed to load workx',
+        title: 'Failed to load work',
         content: err.message,
       })
       setModalErrorVisible(true)
@@ -108,7 +110,7 @@ const Work = () => {
   const searchWork = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
     setRequestPar((prev) => ({
-      ...prev,
+      page: 1,
       searchWorkNo: searchQueryWorkNo,
       searchName: searchQueryName,
     }))
@@ -165,7 +167,7 @@ const Work = () => {
   }
 
   // 📌 Work 삭제 요청
-  const runDeleteWork = async (id) => {
+  const runDeleteWork = async () => {
     try {
       await axios.delete(`${API_WORKS}${deleteWork.id}/`)
       fetchWorks()
@@ -246,8 +248,6 @@ const Work = () => {
             color="info"
             className="text-white"
             onClick={() => {
-              console.log('page : ' + composerPage)
-              console.log('search : ' + composerSearch)
               navigate('/classical/composer', {
                 state: {
                   page: composerPage,
@@ -308,7 +308,7 @@ const Work = () => {
                                   workId: work.id,
                                   workNo: work.work_no,
                                   workName: work.name,
-                                  workComposer: composerId,
+                                  workComposer: composerName,
                                   workPage: requestPar.page,
                                   workSearchWorkNo: requestPar.searchWorkNo,
                                   workSearchName: requestPar.searchName,
