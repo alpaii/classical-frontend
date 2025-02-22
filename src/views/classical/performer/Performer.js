@@ -245,6 +245,9 @@ const Performer = () => {
                     Role
                   </CTableHeaderCell>
                   <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
+                    Recording Count
+                  </CTableHeaderCell>
+                  <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
                     Actions
                   </CTableHeaderCell>
                 </CTableRow>
@@ -253,7 +256,7 @@ const Performer = () => {
                 {/* ✅ 데이터 로딩 상태 */}
                 {loading && (
                   <CTableRow>
-                    <CTableDataCell colSpan={4} className="text-center">
+                    <CTableDataCell colSpan={5} className="text-center">
                       Loading...
                     </CTableDataCell>
                   </CTableRow>
@@ -266,6 +269,31 @@ const Performer = () => {
                       {performer.full_name}
                     </CTableDataCell>
                     <CTableDataCell className="text-center">{performer.role}</CTableDataCell>
+                    <CTableDataCell className="text-center">
+                      {performer.recording_count === 0 ? (
+                        '-'
+                      ) : (
+                        <CButton
+                          color="warning"
+                          size="sm"
+                          onClick={() => {
+                            navigate('/classical/recording', {
+                              state: {
+                                performerId: performer.id,
+                                performerFullName: performer.full_name,
+                                performerPage: requestPar.page,
+                                performerSearchName: requestPar.search,
+                              },
+                            })
+                          }}
+                          className="p-0"
+                          style={{ width: '50px', textAlign: 'center' }} // ✅ 버튼 크기 고정
+                        >
+                          <span style={{ fontSize: '1.1rem' }}>{performer.recording_count}</span>
+                        </CButton>
+                      )}
+                    </CTableDataCell>
+
                     <CTableDataCell className="text-center">
                       <CButton
                         color="info"
