@@ -273,6 +273,9 @@ const Work = () => {
                     Name
                   </CTableHeaderCell>
                   <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
+                    Recording Count
+                  </CTableHeaderCell>
+                  <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
                     Actions
                   </CTableHeaderCell>
                 </CTableRow>
@@ -281,7 +284,7 @@ const Work = () => {
                 {/* ✅ 데이터 로딩 상태 */}
                 {loading && (
                   <CTableRow>
-                    <CTableDataCell colSpan={3} className="text-center">
+                    <CTableDataCell colSpan={4} className="text-center">
                       Loading...
                     </CTableDataCell>
                   </CTableRow>
@@ -292,6 +295,33 @@ const Work = () => {
                     <CTableRow key={work.id}>
                       <CTableDataCell className="table-cell-wrap">{work.work_no}</CTableDataCell>
                       <CTableDataCell className="table-cell-wrap">{work.name}</CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        {work.recording_count === 0 ? (
+                          '-'
+                        ) : (
+                          <CButton
+                            color="warning"
+                            size="sm"
+                            onClick={() => {
+                              navigate('/classical/recording', {
+                                state: {
+                                  workId: work.id,
+                                  workNo: work.work_no,
+                                  workName: work.name,
+                                  workComposer: composerId,
+                                  workPage: requestPar.page,
+                                  workSearchWorkNo: requestPar.searchWorkNo,
+                                  workSearchName: requestPar.searchName,
+                                },
+                              })
+                            }}
+                            className="p-0"
+                            style={{ width: '50px', textAlign: 'center' }} // ✅ 버튼 크기 고정
+                          >
+                            <span style={{ fontSize: '1.1rem' }}>{work.recording_count}</span>
+                          </CButton>
+                        )}
+                      </CTableDataCell>
                       <CTableDataCell className="text-center">
                         <CButton
                           color="info"

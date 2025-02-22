@@ -262,7 +262,6 @@ const Composer = () => {
                             style={{ width: '50px', textAlign: 'center' }} // ✅ 버튼 크기 고정
                           >
                             <span style={{ fontSize: '1.1rem' }}>{composer.work_count}</span>
-                            {/* {composer.work_count} */}
                           </CButton>
                         )}
                       </CTableDataCell>
