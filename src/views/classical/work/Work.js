@@ -33,15 +33,25 @@ const API_WORKS = 'http://127.0.0.1:8000/api/works/' // Work API
 const PAGE_SIZE = 20
 
 const Work = () => {
-  const navigate = useNavigate() // ✅ 페이지 이동 함수
+  const navigate = useNavigate()
   const location = useLocation()
-  const composerId = location.state?.composerId || null // ✅ 전달된 composerId 받기
-  const composerName = location.state?.composerName || null // ✅ 전달된 composerId 받기
-  const composerPage = location.state?.composerPage || null // ✅ 전달된 composerId 받기
-  const composerSearch = location.state?.composerSearch || null // ✅ 전달된 composerId 받기
-  const workPage = location.state?.workPage || 1 // ✅ 전달된 composerId 받기
-  const workSearchWorkNo = location.state?.workSearchWorkNo || '' // ✅ 전달된 composerId 받기
-  const workSearchName = location.state?.workSearchName || '' // ✅ 전달된 composerId 받기
+
+  // location.state
+  const composerInfo = location.state?.composerInfo ?? {}
+  const requestParComposer = location.state?.requestParComposer ?? {}
+  const requestParWork = location.state?.requestParWork ?? {}
+
+  // search parameter
+  const [requestPar, setRequestPar] = useState({
+    page: requestParWork.page || 1,
+    composer: composerInfo.id || 1,
+    searchWorkNo: requestParWork.searchWorkNo || '',
+    searchName: requestParWork.searchName || '',
+  })
+
+  // search inputbox
+  const [searchWorkNo, setSearchWorkNo] = useState(requestPar.searchWorkNo) // search
+  const [searchName, setSearchName] = useState(requestPar.searchName) // search
 
   const [loading, setLoading] = useState(true)
   const [modalErrorVisible, setModalErrorVisible] = useState(false)
@@ -49,11 +59,6 @@ const Work = () => {
 
   const [works, setWorks] = useState([]) // Work 목록
   const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
-  const [requestPar, setRequestPar] = useState({
-    page: workPage,
-    searchWorkNo: workSearchWorkNo,
-    searchName: workSearchName,
-  })
 
   const [addWork, setAddWork] = useState({ work_no: '', name: '' }) // 새 Work 추가 상태
   const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
@@ -66,23 +71,12 @@ const Work = () => {
   const [deleteWork, setDeleteWork] = useState({ id: '' }) // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
-  const [searchQueryWorkNo, setSearchQueryWorkNo] = useState('') // search
-  const [searchQueryName, setSearchQueryName] = useState('') // search
-
   // 📌 선택한 Composer의 Work 목록 가져오기
   const fetchWorks = useCallback(async () => {
     const loadingTimeout = setTimeout(() => setLoading(true), 100)
     try {
-      const params = { page: requestPar.page, composer: composerId }
-      if (requestPar.searchWorkNo) {
-        params.search_work_no = requestPar.searchWorkNo
-      }
-      if (requestPar.searchName) {
-        params.search_name = requestPar.searchName
-      }
-      const response = await axios.get(API_WORKS, { params })
+      const response = await axios.get(API_WORKS, { params: requestPar })
       clearTimeout(loadingTimeout)
-
       setWorks(response.data.results)
       setTotalPageCount(Math.ceil(response.data.count / PAGE_SIZE))
     } catch (err) {
@@ -95,7 +89,7 @@ const Work = () => {
     } finally {
       setLoading(false)
     }
-  }, [composerId, requestPar]) // ✅ useCallback에 의존성 추가
+  }, [requestPar]) // ✅ useCallback에 의존성 추가
 
   useEffect(() => {
     fetchWorks()
@@ -110,9 +104,10 @@ const Work = () => {
   const searchWork = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
     setRequestPar((prev) => ({
+      ...prev,
       page: 1,
-      searchWorkNo: searchQueryWorkNo,
-      searchName: searchQueryName,
+      searchWorkNo: searchWorkNo,
+      searchName: searchName,
     }))
   }
 
@@ -132,13 +127,13 @@ const Work = () => {
 
   // 📌 새로운 Work 추가
   const runAddWork = async () => {
-    if (!addWork.work_no || !addWork.name || !composerId) {
+    if (!addWork.work_no || !addWork.name || !composerInfo.id) {
       alert('Please enter all fields')
       return
     }
 
     try {
-      await axios.post(API_WORKS, { ...addWork, composer: composerId })
+      await axios.post(API_WORKS, { ...addWork, composer: composerInfo.id })
       fetchWorks() // 목록 다시 불러오기
       setModalAddVisible(false)
       setAddWork({ work_no: '', name: '' }) // 입력 필드 초기화
@@ -193,7 +188,7 @@ const Work = () => {
                     <CInputGroupText className="border border-primary">Composer</CInputGroupText>
                     <CFormInput
                       type="text"
-                      value={composerName}
+                      value={composerInfo.fullName}
                       disabled
                       className="border border-primary"
                       style={{ width: '300px' }}
@@ -205,8 +200,8 @@ const Work = () => {
                     <CInputGroupText className="border border-primary">Work No.</CInputGroupText>
                     <CFormInput
                       type="text"
-                      value={searchQueryWorkNo}
-                      onChange={(e) => setSearchQueryWorkNo(e.target.value)}
+                      value={searchWorkNo}
+                      onChange={(e) => setSearchWorkNo(e.target.value)}
                       className="border border-primary"
                     />
                   </CInputGroup>
@@ -216,8 +211,8 @@ const Work = () => {
                     <CInputGroupText className="border border-primary">Name</CInputGroupText>
                     <CFormInput
                       type="text"
-                      value={searchQueryName}
-                      onChange={(e) => setSearchQueryName(e.target.value)}
+                      value={searchName}
+                      onChange={(e) => setSearchName(e.target.value)}
                       className="border border-primary"
                     />
                   </CInputGroup>
@@ -249,10 +244,7 @@ const Work = () => {
             className="text-white"
             onClick={() => {
               navigate('/classical/composer', {
-                state: {
-                  page: composerPage,
-                  search: composerSearch,
-                },
+                state: { requestParComposer },
               })
             }}
           >
@@ -308,7 +300,7 @@ const Work = () => {
                                   workId: work.id,
                                   workNo: work.work_no,
                                   workName: work.name,
-                                  workComposer: composerName,
+                                  workComposer: composerInfo.fullName,
                                   workPage: requestPar.page,
                                   workSearchWorkNo: requestPar.searchWorkNo,
                                   workSearchName: requestPar.searchName,
@@ -379,7 +371,12 @@ const Work = () => {
         <CModalBody>
           <CForm>
             <CFormLabel>Composer</CFormLabel>
-            <CFormInput type="text" disabled value={composerName} className="border border-dark" />
+            <CFormInput
+              type="text"
+              disabled
+              value={composerInfo.fullName}
+              className="border border-dark"
+            />
             <CFormLabel className="mt-3">Work No.</CFormLabel>
             <CFormInput
               ref={nameAddInputRef} // ✅ `ref`를 추가하여 자동 포커스 적용
@@ -415,7 +412,12 @@ const Work = () => {
         <CModalBody>
           <CForm>
             <CFormLabel>Composer</CFormLabel>
-            <CFormInput type="text" disabled value={composerName} className="border border-dark" />
+            <CFormInput
+              type="text"
+              disabled
+              value={composerInfo.fullName}
+              className="border border-dark"
+            />
             <CFormLabel className="mt-3">Work No.</CFormLabel>
             <CFormInput
               ref={nameUpdateInputRef} // ✅ `ref`를 추가하여 자동 포커스 적용
@@ -452,7 +454,7 @@ const Work = () => {
           <div className="mt-2">Are you sure to delete this work?</div>
           <div className="mb-5 mt-5 text-danger text-center">
             <div className="mb-3">
-              <strong>{composerName}</strong>
+              <strong>{composerInfo.fullName}</strong>
             </div>
             <div className="mb-3">
               <strong>{deleteWork?.work_no || ''}</strong>

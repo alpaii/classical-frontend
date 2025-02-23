@@ -33,10 +33,20 @@ const API_URL = 'http://127.0.0.1:8000/api/composers/'
 const PAGE_SIZE = 20
 
 const Composer = () => {
-  const navigate = useNavigate() // ✅ 페이지 이동 함수
+  const navigate = useNavigate()
   const location = useLocation()
-  const composerPage = location.state?.page || 1
-  const composerSearch = location.state?.search || ''
+
+  // location.state
+  const requestParComposer = location.state?.requestParComposer ?? {}
+
+  // search parameter
+  const [requestPar, setRequestPar] = useState({
+    page: requestParComposer.page || 1,
+    searchFullName: requestParComposer.searchFullName || '',
+  })
+
+  // search inputbox
+  const [searchFullName, setSearchFullName] = useState(requestPar.searchFullName) // search
 
   const [loading, setLoading] = useState(true)
   const [modalErrorVisible, setModalErrorVisible] = useState(false)
@@ -44,10 +54,6 @@ const Composer = () => {
 
   const [composers, setComposers] = useState([]) // composer list
   const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
-  const [requestPar, setRequestPar] = useState({
-    page: composerPage,
-    search: composerSearch,
-  })
 
   const [addComposer, setAddComposer] = useState({ name: '', full_name: '' }) // add new
   const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
@@ -60,19 +66,12 @@ const Composer = () => {
   const [deleteComposer, setDeleteComposer] = useState() // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
-  const [searchQuery, setSearchQuery] = useState(composerSearch) // search
-
   // ✅ useCallback을 사용하여 함수가 불필요하게 새로 생성되지 않도록 함
   const fetchComposers = useCallback(async () => {
     const loadingTimeout = setTimeout(() => setLoading(true), 100)
     try {
-      const params = { page: requestPar.page }
-      if (requestPar.search) {
-        params.search = requestPar.search // ✅ search가 있을 때만 추가
-      }
-      const response = await axios.get(API_URL, { params })
+      const response = await axios.get(API_URL, { params: requestPar })
       clearTimeout(loadingTimeout)
-
       setComposers(response.data.results)
       setTotalPageCount(Math.ceil(response.data.count / PAGE_SIZE))
     } catch (err) {
@@ -100,7 +99,7 @@ const Composer = () => {
   // 📌 Composer 검색 기능
   const searchComposer = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
-    setRequestPar({ page: 1, search: searchQuery.trim() }) // 검색어 적용, 페이지 초기화
+    setRequestPar({ page: 1, searchFullName }) // 검색어 적용, 페이지 초기화
   }
 
   // 📌 Add 모달이 열릴 때 name input에 자동 포커스
@@ -180,8 +179,8 @@ const Composer = () => {
                     <CInputGroupText className="border border-primary">Composer</CInputGroupText>
                     <CFormInput
                       type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      value={searchFullName}
+                      onChange={(e) => setSearchFullName(e.target.value.trim())}
                       className="border border-primary"
                     />
                   </CInputGroup>
@@ -251,10 +250,11 @@ const Composer = () => {
                             onClick={() => {
                               navigate('/classical/work', {
                                 state: {
-                                  composerId: composer.id,
-                                  composerName: composer.full_name,
-                                  composerPage: requestPar.page,
-                                  composerSearch: requestPar.search,
+                                  composerInfo: {
+                                    id: composer.id,
+                                    fullName: composer.full_name,
+                                  },
+                                  requestParComposer: requestPar,
                                 },
                               })
                             }}
