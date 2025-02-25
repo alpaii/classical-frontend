@@ -28,6 +28,7 @@ import CIcon from '@coreui/icons-react'
 import { cilPlus, cilPencil, cilX, cilChevronLeft } from '@coreui/icons'
 import ErrorModal from '../../../components/custom/ErrorModal' // ✅ 모달 컴포넌트 불러오기
 import Pagination from '../../../components/custom/Pagination' // ✅ 페이지네이션 컴포넌트 불러오기
+import { convertSnakeToCamel } from '../../../utils/formatters' // ✅ 유틸 함수 가져오기
 
 const API_WORKS = 'http://127.0.0.1:8000/api/works/' // Work API
 const PAGE_SIZE = 20
@@ -38,46 +39,52 @@ const Work = () => {
 
   // location.state
   const composerInfo = location.state?.composerInfo ?? {}
-  const requestParComposer = location.state?.requestParComposer ?? {}
   const requestParWork = location.state?.requestParWork ?? {}
 
   // search parameter
   const [requestPar, setRequestPar] = useState({
     page: requestParWork.page || 1,
-    composer: composerInfo.id || 1,
-    searchWorkNo: requestParWork.searchWorkNo || '',
-    searchName: requestParWork.searchName || '',
+    composerId: composerInfo.id || 1,
+    workNo: requestParWork.workNo || '',
+    name: requestParWork.name || '',
   })
 
   // search inputbox
-  const [searchWorkNo, setSearchWorkNo] = useState(requestPar.searchWorkNo) // search
-  const [searchName, setSearchName] = useState(requestPar.searchName) // search
+  const [searchWorkNo, setSearchWorkNo] = useState(requestPar.workNo) // search
+  const [searchName, setSearchName] = useState(requestPar.name) // search
 
   const [loading, setLoading] = useState(true)
   const [modalErrorVisible, setModalErrorVisible] = useState(false)
-  const [errorMessage, setErrorMessage] = useState({ title: '', content: '' })
+  const [errorMessage, setErrorMessage] = useState({})
 
   const [works, setWorks] = useState([]) // Work 목록
   const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
 
-  const [addWork, setAddWork] = useState({ work_no: '', name: '' }) // 새 Work 추가 상태
+  const [addWork, setAddWork] = useState({}) // 새 Work 추가 상태
   const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
   const nameAddInputRef = useRef(null) // focus
 
-  const [updateWork, setUpdateWork] = useState({ id: '', composer: '', work_no: '', name: '' }) // 편집 중인 Work 데이터
+  const [updateWork, setUpdateWork] = useState({}) // 편집 중인 Work 데이터
   const [modalUpdateVisible, setModalUpdateVisible] = useState(false) // update modal
   const nameUpdateInputRef = useRef(null) // focus
 
-  const [deleteWork, setDeleteWork] = useState({ id: '' }) // delete
+  const [deleteWork, setDeleteWork] = useState() // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
 
   // 📌 선택한 Composer의 Work 목록 가져오기
   const fetchWorks = useCallback(async () => {
     const loadingTimeout = setTimeout(() => setLoading(true), 100)
     try {
-      const response = await axios.get(API_WORKS, { params: requestPar })
+      const response = await axios.get(API_WORKS, {
+        params: {
+          page: requestPar.page,
+          composer_id: requestPar.composerId,
+          work_no: requestPar.workNo,
+          name: requestPar.name,
+        },
+      })
       clearTimeout(loadingTimeout)
-      setWorks(response.data.results)
+      setWorks(convertSnakeToCamel(response.data.results))
       setTotalPageCount(Math.ceil(response.data.count / PAGE_SIZE))
     } catch (err) {
       clearTimeout(loadingTimeout)
@@ -106,8 +113,8 @@ const Work = () => {
     setRequestPar((prev) => ({
       ...prev,
       page: 1,
-      searchWorkNo: searchWorkNo,
-      searchName: searchName,
+      workNo: searchWorkNo,
+      name: searchName,
     }))
   }
 
@@ -127,16 +134,20 @@ const Work = () => {
 
   // 📌 새로운 Work 추가
   const runAddWork = async () => {
-    if (!addWork.work_no || !addWork.name || !composerInfo.id) {
+    if (!addWork.workNo || !addWork.name || !composerInfo.id) {
       alert('Please enter all fields')
       return
     }
 
     try {
-      await axios.post(API_WORKS, { ...addWork, composer: composerInfo.id })
+      await axios.post(API_WORKS, {
+        composer: composerInfo.id,
+        work_no: addWork.workNo,
+        name: addWork.name,
+      })
       fetchWorks() // 목록 다시 불러오기
       setModalAddVisible(false)
-      setAddWork({ work_no: '', name: '' }) // 입력 필드 초기화
+      setAddWork({ workNo: '', name: '' }) // 입력 필드 초기화
     } catch (err) {
       setErrorMessage({
         title: 'Failed to add work',
@@ -149,7 +160,10 @@ const Work = () => {
   // 📌 Work 수정 요청
   const runUpdateWork = async () => {
     try {
-      await axios.put(`${API_WORKS}${updateWork.id}/`, updateWork)
+      await axios.put(`${API_WORKS}${updateWork.id}/`, {
+        work_no: updateWork.workNo,
+        name: updateWork.name,
+      })
       fetchWorks() // 목록 갱신
       setModalUpdateVisible(false)
     } catch (err) {
@@ -244,7 +258,7 @@ const Work = () => {
             className="text-white"
             onClick={() => {
               navigate('/classical/composer', {
-                state: { requestParComposer },
+                state: location.state,
               })
             }}
           >
@@ -285,10 +299,10 @@ const Work = () => {
                 {!loading &&
                   works.map((work) => (
                     <CTableRow key={work.id}>
-                      <CTableDataCell className="table-cell-wrap">{work.work_no}</CTableDataCell>
+                      <CTableDataCell className="table-cell-wrap">{work.workNo}</CTableDataCell>
                       <CTableDataCell className="table-cell-wrap">{work.name}</CTableDataCell>
                       <CTableDataCell className="text-center">
-                        {work.recording_count === 0 ? (
+                        {work.recordingCount === 0 ? (
                           '-'
                         ) : (
                           <CButton
@@ -297,20 +311,16 @@ const Work = () => {
                             onClick={() => {
                               navigate('/classical/recording', {
                                 state: {
-                                  workId: work.id,
-                                  workNo: work.work_no,
-                                  workName: work.name,
-                                  workComposer: composerInfo.fullName,
-                                  workPage: requestPar.page,
-                                  workSearchWorkNo: requestPar.searchWorkNo,
-                                  workSearchName: requestPar.searchName,
+                                  ...location.state,
+                                  composerInfo: composerInfo,
+                                  requestParWork: requestPar,
                                 },
                               })
                             }}
                             className="p-0"
                             style={{ width: '50px', textAlign: 'center' }} // ✅ 버튼 크기 고정
                           >
-                            <span style={{ fontSize: '1.1rem' }}>{work.recording_count}</span>
+                            <span style={{ fontSize: '1.1rem' }}>{work.recordingCount}</span>
                           </CButton>
                         )}
                       </CTableDataCell>
@@ -321,12 +331,7 @@ const Work = () => {
                           size="sm"
                           onClick={() => {
                             setModalUpdateVisible(true)
-                            setUpdateWork({
-                              id: work.id,
-                              composer: work.composer,
-                              work_no: work.work_no,
-                              name: work.name,
-                            })
+                            setUpdateWork(work)
                           }}
                           className="hover-white me-2"
                         >
@@ -381,14 +386,14 @@ const Work = () => {
             <CFormInput
               ref={nameAddInputRef} // ✅ `ref`를 추가하여 자동 포커스 적용
               type="text"
-              value={addWork.work_no}
-              onChange={(e) => setAddWork({ ...addWork, work_no: e.target.value })}
+              value={addWork.workNo || ''}
+              onChange={(e) => setAddWork({ ...addWork, workNo: e.target.value })}
               className="border border-dark"
             />
             <CFormLabel className="mt-3">Name</CFormLabel>
             <CFormInput
               type="text"
-              value={addWork.name}
+              value={addWork.name || ''}
               onChange={(e) => setAddWork({ ...addWork, name: e.target.value })}
               className="border border-dark"
             />
@@ -422,8 +427,8 @@ const Work = () => {
             <CFormInput
               ref={nameUpdateInputRef} // ✅ `ref`를 추가하여 자동 포커스 적용
               type="text"
-              value={updateWork.work_no}
-              onChange={(e) => setUpdateWork({ ...updateWork, work_no: e.target.value })}
+              value={updateWork.workNo}
+              onChange={(e) => setUpdateWork({ ...updateWork, workNo: e.target.value })}
               className="border border-dark"
             />
             <CFormLabel className="mt-3">Name</CFormLabel>
@@ -457,7 +462,7 @@ const Work = () => {
               <strong>{composerInfo.fullName}</strong>
             </div>
             <div className="mb-3">
-              <strong>{deleteWork?.work_no || ''}</strong>
+              <strong>{deleteWork?.workNo || ''}</strong>
             </div>
             <div>
               <strong>{deleteWork?.name || ''}</strong>

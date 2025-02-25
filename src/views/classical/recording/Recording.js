@@ -9,7 +9,6 @@ import {
   CButton,
   CForm,
   CFormInput,
-  CFormLabel,
   CInputGroup,
   CInputGroupText,
   CModal,
@@ -37,8 +36,9 @@ const API_RECORDING_DETAILS = 'http://127.0.0.1:8000/api/recording-details/' // 
 const PAGE_SIZE = 20
 
 const Recording = () => {
-  const navigate = useNavigate() // ✅ 페이지 이동 함수
+  const navigate = useNavigate()
   const location = useLocation()
+
   const workId = location.state?.workId || null
   const workNo = location.state?.workNo || null
   const workName = location.state?.workName || null

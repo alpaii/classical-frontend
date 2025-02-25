@@ -1,33 +1,18 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
-import {
-  CRow,
-  CCol,
-  CCard,
-  CCardBody,
-  CButton,
-  CForm,
-  CFormInput,
-  CFormLabel,
-  CInputGroup,
-  CInputGroupText,
-  CModal,
-  CModalBody,
-  CModalFooter,
-  CModalHeader,
-  CModalTitle,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilPlus, cilPencil, cilX } from '@coreui/icons'
-import ErrorModal from '../../../components/custom/ErrorModal' // ✅ 모달 컴포넌트 불러오기
-import Pagination from '../../../components/custom/Pagination' // ✅ 페이지네이션 컴포넌트 불러오기
+import { CRow, CCol, CCard, CCardBody } from '@coreui/react'
+
+import ErrorModal from '../modals/ErrorModal' // ✅ 모달 컴포넌트 불러오기
+import Pagination from '../modals/Pagination' // ✅ 페이지네이션 컴포넌트 불러오기
+
+import ComposerSearchForm from './components/ComposerSearchForm'
+import ComposerTable from './components/ComposerTable'
+import AddComposerModal from './components/AddComposerModal'
+import EditComposerModal from './components/EditComposerModal'
+import DeleteComposerModal from './components/DeleteComposerModal'
+
+import { convertSnakeToCamel } from '../../../utils/formatters' // ✅ 유틸 함수 가져오기
 
 const API_URL = 'http://127.0.0.1:8000/api/composers/'
 const PAGE_SIZE = 20
@@ -50,18 +35,16 @@ const Composer = () => {
 
   const [loading, setLoading] = useState(true)
   const [modalErrorVisible, setModalErrorVisible] = useState(false)
-  const [errorMessage, setErrorMessage] = useState({ title: '', content: '' })
+  const [errorMessage, setErrorMessage] = useState({})
 
   const [composers, setComposers] = useState([]) // composer list
   const [totalPageCount, setTotalPageCount] = useState(0) // 전체 페이지 개수
 
-  const [addComposer, setAddComposer] = useState({ name: '', full_name: '' }) // add new
+  const [addComposer, setAddComposer] = useState({}) // add new
   const [modalAddVisible, setModalAddVisible] = useState(false) // add new modal
-  const nameAddInputRef = useRef(null) // focus
 
-  const [updateComposer, setUpdateComposer] = useState({ id: '', name: '', full_name: '' }) // update
+  const [updateComposer, setUpdateComposer] = useState({}) // update
   const [modalUpdateVisible, setModalUpdateVisible] = useState(false) // update modal
-  const nameUpdateInputRef = useRef(null) // focus
 
   const [deleteComposer, setDeleteComposer] = useState() // delete
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false) // delete modal
@@ -70,9 +53,14 @@ const Composer = () => {
   const fetchComposers = useCallback(async () => {
     const loadingTimeout = setTimeout(() => setLoading(true), 100)
     try {
-      const response = await axios.get(API_URL, { params: requestPar })
+      const response = await axios.get(API_URL, {
+        params: {
+          page: requestPar.page,
+          full_name: requestPar.searchFullName,
+        },
+      })
       clearTimeout(loadingTimeout)
-      setComposers(response.data.results)
+      setComposers(convertSnakeToCamel(response.data.results))
       setTotalPageCount(Math.ceil(response.data.count / PAGE_SIZE))
     } catch (err) {
       clearTimeout(loadingTimeout)
@@ -102,32 +90,21 @@ const Composer = () => {
     setRequestPar({ page: 1, searchFullName }) // 검색어 적용, 페이지 초기화
   }
 
-  // 📌 Add 모달이 열릴 때 name input에 자동 포커스
-  useEffect(() => {
-    if (modalAddVisible) {
-      setTimeout(() => nameAddInputRef.current?.focus(), 200) // ✅ 모달이 열리면 name 필드에 포커스
-    }
-  }, [modalAddVisible])
-
-  // 📌 Edit 모달이 열릴 때 name input에 자동 포커스
-  useEffect(() => {
-    if (modalUpdateVisible) {
-      setTimeout(() => nameUpdateInputRef.current?.focus(), 200) // ✅ 모달이 열리면 name 필드에 포커스
-    }
-  }, [modalUpdateVisible])
-
   // 📌 새 작곡가 추가 함수
   const runAddComposer = async () => {
-    if (!addComposer.name || !addComposer.full_name) {
+    if (!addComposer.name || !addComposer.fullName) {
       alert('Please enter both name and full name')
       return
     }
 
     try {
-      const response = await axios.post(API_URL, addComposer) // 서버에 추가 요청
+      const response = await axios.post(API_URL, {
+        name: addComposer.name,
+        full_name: addComposer.fullName,
+      })
       fetchComposers() // 다시 불러오기
       setModalAddVisible(false)
-      setAddComposer({ name: '', full_name: '' }) // 입력 필드 초기화
+      setAddComposer({ name: '', fullName: '' }) // 입력 필드 초기화
     } catch (err) {
       setErrorMessage({
         title: 'Failed to add composers',
@@ -140,7 +117,10 @@ const Composer = () => {
   // 📌 편집 내용 저장 (업데이트)
   const runUpdateComposer = async () => {
     try {
-      await axios.put(`${API_URL}${updateComposer.id}/`, updateComposer) // Django API에 PUT 요청
+      await axios.put(`${API_URL}${updateComposer.id}/`, {
+        name: updateComposer.name,
+        full_name: updateComposer.fullName,
+      })
       fetchComposers() // 목록 갱신
       setModalUpdateVisible(false)
     } catch (err) {
@@ -173,132 +153,27 @@ const Composer = () => {
         <CCard className="mb-4 border-primary bg-primary-light">
           <CCardBody>
             <CRow>
-              <CForm className="row ms-2 gy-1 gx-3 align-items-center" onSubmit={searchComposer}>
-                <CCol xs="auto">
-                  <CInputGroup>
-                    <CInputGroupText className="border border-primary">Composer</CInputGroupText>
-                    <CFormInput
-                      type="text"
-                      value={searchFullName}
-                      onChange={(e) => setSearchFullName(e.target.value.trim())}
-                      className="border border-primary"
-                    />
-                  </CInputGroup>
-                </CCol>
-                <CCol xs="auto">
-                  <CButton color="primary" type="submit">
-                    Search
-                  </CButton>
-                </CCol>
-                <CCol xs="auto" className="ms-auto me-4">
-                  <CButton
-                    color="info"
-                    className="text-white"
-                    onClick={() => setModalAddVisible(true)}
-                  >
-                    <CIcon icon={cilPlus} size="l" className="me-2" />
-                    Add Composer
-                  </CButton>
-                </CCol>
-              </CForm>{' '}
+              <ComposerSearchForm
+                searchFullName={searchFullName}
+                setSearchFullName={setSearchFullName}
+                searchComposer={searchComposer}
+                setModalAddVisible={setModalAddVisible}
+              />
             </CRow>
           </CCardBody>
         </CCard>
         <CCard className="mb-4 border-primary border-2">
           <CCardBody>
-            <CTable bordered striped hover style={{ width: 'auto' }} className="border-success">
-              <CTableHead color="success" className="border-2">
-                <CTableRow>
-                  <CTableHeaderCell scope="col" style={{ width: '300px' }} className="text-center">
-                    Name
-                  </CTableHeaderCell>
-                  <CTableHeaderCell scope="col" style={{ width: '500px' }} className="text-center">
-                    Full Name
-                  </CTableHeaderCell>
-                  <CTableHeaderCell scope="col" style={{ width: '150px' }} className="text-center">
-                    Work Count
-                  </CTableHeaderCell>
-                  <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
-                    Actions
-                  </CTableHeaderCell>
-                </CTableRow>
-              </CTableHead>
-              <CTableBody>
-                {/* ✅ 데이터 로딩 상태 */}
-                {loading && (
-                  <CTableRow>
-                    <CTableDataCell colSpan={4} className="text-center">
-                      Loading...
-                    </CTableDataCell>
-                  </CTableRow>
-                )}
-                {/* ✅ 서버에서 가져온 작곡가 목록 */}
-                {!loading &&
-                  composers.map((composer) => (
-                    <CTableRow key={composer.id}>
-                      <CTableDataCell className="table-cell-wrap">{composer.name}</CTableDataCell>
-                      <CTableDataCell className="table-cell-wrap">
-                        {composer.full_name}
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        {composer.work_count === 0 ? (
-                          '-'
-                        ) : (
-                          <CButton
-                            color="warning"
-                            size="sm"
-                            onClick={() => {
-                              navigate('/classical/work', {
-                                state: {
-                                  composerInfo: {
-                                    id: composer.id,
-                                    fullName: composer.full_name,
-                                  },
-                                  requestParComposer: requestPar,
-                                },
-                              })
-                            }}
-                            className="p-0"
-                            style={{ width: '50px', textAlign: 'center' }} // ✅ 버튼 크기 고정
-                          >
-                            <span style={{ fontSize: '1.1rem' }}>{composer.work_count}</span>
-                          </CButton>
-                        )}
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CButton
-                          color="info"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setModalUpdateVisible(true)
-                            setUpdateComposer({
-                              id: composer.id,
-                              name: composer.name,
-                              full_name: composer.full_name,
-                            })
-                          }}
-                          className="hover-white me-2"
-                        >
-                          <CIcon icon={cilPencil} size="l" />
-                        </CButton>
-                        <CButton
-                          color="danger"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setDeleteComposer(composer)
-                            setModalDeleteVisible(true)
-                          }}
-                          className="hover-white"
-                        >
-                          <CIcon icon={cilX} size="l" />
-                        </CButton>
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
-              </CTableBody>
-            </CTable>
+            <ComposerTable
+              composers={composers}
+              loading={loading}
+              requestPar={requestPar}
+              navigate={navigate}
+              setUpdateComposer={setUpdateComposer}
+              setModalUpdateVisible={setModalUpdateVisible}
+              setDeleteComposer={setDeleteComposer}
+              setModalDeleteVisible={setModalDeleteVisible}
+            />{' '}
             <CRow>
               <CCol xs="auto">
                 {/* ✅ 페이지네이션 추가 */}
@@ -314,93 +189,30 @@ const Composer = () => {
       </CCol>
 
       {/* ✅ Add 모달 창 추가 */}
-      <CModal visible={modalAddVisible} onClose={() => setModalAddVisible(false)}>
-        <CModalHeader>
-          <CModalTitle>Add Composer</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <CForm>
-            <CFormLabel>Name</CFormLabel>
-            <CFormInput
-              ref={nameAddInputRef} // ✅ `ref`를 추가하여 자동 포커스 적용
-              type="text"
-              value={addComposer.name}
-              onChange={(e) => setAddComposer({ ...addComposer, name: e.target.value })}
-              className="border border-dark"
-            />
-            <CFormLabel className="mt-3">Full Name</CFormLabel>
-            <CFormInput
-              type="text"
-              value={addComposer.full_name}
-              onChange={(e) => setAddComposer({ ...addComposer, full_name: e.target.value })}
-              className="border border-dark"
-            />
-          </CForm>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" onClick={() => setModalAddVisible(false)}>
-            Close
-          </CButton>
-          <CButton color="info" onClick={runAddComposer} className="text-white">
-            Save
-          </CButton>
-        </CModalFooter>
-      </CModal>
+      <AddComposerModal
+        visible={modalAddVisible}
+        onClose={() => setModalAddVisible(false)}
+        onSave={runAddComposer}
+        composer={addComposer}
+        setComposer={setAddComposer}
+      />
 
       {/* ✅ Edit 모달 창 추가 */}
-      <CModal visible={modalUpdateVisible} onClose={() => setModalUpdateVisible(false)}>
-        <CModalHeader>
-          <CModalTitle>Edit Composer</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <CForm>
-            <CFormLabel>Name</CFormLabel>
-            <CFormInput
-              ref={nameUpdateInputRef} // ✅ `ref`를 추가하여 자동 포커스 적용
-              type="text"
-              value={updateComposer.name}
-              onChange={(e) => setUpdateComposer({ ...updateComposer, name: e.target.value })}
-              className="border border-dark"
-            />
-            <CFormLabel className="mt-3">Full Name</CFormLabel>
-            <CFormInput
-              type="text"
-              value={updateComposer.full_name}
-              onChange={(e) => setUpdateComposer({ ...updateComposer, full_name: e.target.value })}
-              className="border border-dark"
-            />
-          </CForm>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" onClick={() => setModalUpdateVisible(false)}>
-            Close
-          </CButton>
-          <CButton color="info" onClick={runUpdateComposer} className="text-white">
-            Save
-          </CButton>
-        </CModalFooter>
-      </CModal>
+      <EditComposerModal
+        visible={modalUpdateVisible}
+        onClose={() => setModalUpdateVisible(false)}
+        onSave={runUpdateComposer}
+        composer={updateComposer}
+        setComposer={setUpdateComposer}
+      />
 
       {/* 삭제 확인 모달 */}
-      <CModal visible={modalDeleteVisible} onClose={() => setModalDeleteVisible(false)}>
-        <CModalHeader>
-          <CModalTitle>Delete Composer</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <div className="mt-2">Are you sure to delete this composer?</div>
-          <div className="mb-5 mt-5 text-danger text-center">
-            <strong>{deleteComposer?.full_name || ''}</strong>
-          </div>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" onClick={() => setModalDeleteVisible(false)}>
-            Close
-          </CButton>
-          <CButton color="danger" onClick={runDeleteComposer} className="text-white">
-            Delete
-          </CButton>
-        </CModalFooter>
-      </CModal>
+      <DeleteComposerModal
+        visible={modalDeleteVisible}
+        onClose={() => setModalDeleteVisible(false)}
+        onDelete={runDeleteComposer}
+        composer={deleteComposer}
+      />
 
       {/* 오류 모달 */}
       <ErrorModal
