@@ -11,7 +11,7 @@ import {
   CModalTitle,
 } from '@coreui/react'
 
-const EditComposerModal = ({ visible, onClose, onSave, composer, setComposer }) => {
+const EditModal = ({ visible, onClose, onSave, item, setItem }) => {
   const nameInputRef = useRef(null)
 
   useEffect(() => {
@@ -31,15 +31,15 @@ const EditComposerModal = ({ visible, onClose, onSave, composer, setComposer }) 
           <CFormInput
             ref={nameInputRef} // ✅ 자동 포커스
             type="text"
-            value={composer.name || ''}
-            onChange={(e) => setComposer({ ...composer, name: e.target.value })}
+            value={item.name || ''}
+            onChange={(e) => setItem({ ...item, name: e.target.value })}
             className="border border-dark"
           />
           <CFormLabel className="mt-3">Full Name</CFormLabel>
           <CFormInput
             type="text"
-            value={composer.fullName || ''}
-            onChange={(e) => setComposer({ ...composer, fullName: e.target.value })}
+            value={item.fullName || ''}
+            onChange={(e) => setItem({ ...item, fullName: e.target.value })}
             className="border border-dark"
           />
         </CForm>
@@ -56,4 +56,4 @@ const EditComposerModal = ({ visible, onClose, onSave, composer, setComposer }) 
   )
 }
 
-export default EditComposerModal
+export default EditModal

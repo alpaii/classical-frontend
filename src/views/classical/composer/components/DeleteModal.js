@@ -1,16 +1,16 @@
 import React from 'react'
 import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react'
 
-const DeleteComposerModal = ({ visible, onClose, onDelete, composer }) => {
+const DeleteModal = ({ visible, onClose, onDelete, item }) => {
   return (
     <CModal visible={visible} onClose={onClose}>
       <CModalHeader>
         <CModalTitle>Delete Composer</CModalTitle>
       </CModalHeader>
       <CModalBody>
-        <div className="mt-2">Are you sure you want to delete this composer?</div>
+        <div className="mt-2">Are you sure you want to delete this item?</div>
         <div className="mb-5 mt-5 text-danger text-center">
-          <strong>{composer?.fullName || ''}</strong>
+          <strong>{item?.fullName || ''}</strong>
         </div>
       </CModalBody>
       <CModalFooter>
@@ -25,4 +25,4 @@ const DeleteComposerModal = ({ visible, onClose, onDelete, composer }) => {
   )
 }
 
-export default DeleteComposerModal
+export default DeleteModal

@@ -1,14 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { CButton, CCol, CForm, CFormInput, CInputGroup, CInputGroupText } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilPlus } from '@coreui/icons'
 
-const ComposerSearchForm = ({
-  searchFullName,
-  setSearchFullName,
-  searchComposer,
-  setModalAddVisible,
-}) => {
+const SearchForm = ({ requestPar, setRequestPar, setModalAddVisible }) => {
+  const [searchFullName, setSearchFullName] = useState(requestPar.searchFullName)
+
+  // 📌 Composer 검색 기능
+  const searchComposer = async (e) => {
+    e.preventDefault() // 기본 폼 제출 동작 방지
+    setRequestPar({ page: 1, searchFullName }) // 검색어 적용, 페이지 초기화
+  }
+
   return (
     <CForm className="row ms-2 gy-1 gx-3 align-items-center" onSubmit={searchComposer}>
       <CCol xs="auto">
@@ -37,4 +40,4 @@ const ComposerSearchForm = ({
   )
 }
 
-export default ComposerSearchForm
+export default SearchForm
