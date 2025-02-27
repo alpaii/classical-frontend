@@ -3,15 +3,10 @@ import { convertSnakeToCamel } from '../../../utils/formatters' // ✅ 유틸 �
 
 const API_URL = 'http://127.0.0.1:8000/api/composers/'
 const PAGE_SIZE = 20
+const ITEM = 'composer'
 
 // ✅ 작곡가 목록 가져오기
-export const fetchList = async (
-  requestPar,
-  setComposers,
-  setTotalPageCount,
-  setErrorMessage,
-  setModalErrorVisible,
-) => {
+export const fetchList = async (requestPar, setComposers, setTotalPageCount, setErrorMessage) => {
   try {
     const response = await axios.get(API_URL, {
       params: {
@@ -23,21 +18,13 @@ export const fetchList = async (
     setTotalPageCount(Math.ceil(response.data.count / PAGE_SIZE))
   } catch (err) {
     setErrorMessage({
-      title: 'Failed to load composers',
+      title: 'Failed to load ' + ITEM,
       content: err.message,
     })
-    setModalErrorVisible(true)
   }
 }
 
-export const runAddItem = async (
-  addItem,
-  setRequestPar,
-  setModalAddVisible,
-  setAddItem,
-  setErrorMessage,
-  setModalErrorVisible,
-) => {
+export const runAddItem = async (addItem, setModalAddVisible, setRequestPar, setErrorMessage) => {
   if (!addItem.name || !addItem.fullName) {
     alert('Please enter both name and full name')
     return
@@ -50,22 +37,19 @@ export const runAddItem = async (
     })
     setRequestPar((prev) => ({ ...prev }))
     setModalAddVisible(false)
-    setAddItem({ name: '', fullName: '' })
   } catch (err) {
     setErrorMessage({
-      title: 'Failed to add composers',
+      title: 'Failed to add ' + ITEM,
       content: err.message,
     })
-    setModalErrorVisible(true)
   }
 }
 
 export const runEditItem = async (
   editItem,
-  setRequestPar,
   setModalEditVisible,
+  setRequestPar,
   setErrorMessage,
-  setModalErrorVisible,
 ) => {
   try {
     await axios.put(`${API_URL}${editItem.id}/`, {
@@ -76,19 +60,17 @@ export const runEditItem = async (
     setModalEditVisible(false)
   } catch (err) {
     setErrorMessage({
-      title: 'Failed to edit composers',
+      title: 'Failed to edit ' + ITEM,
       content: err.message,
     })
-    setModalErrorVisible(true)
   }
 }
 
 export const runDeleteItem = async (
   deleteItem,
-  setRequestPar,
   setModalDeleteVisible,
+  setRequestPar,
   setErrorMessage,
-  setModalErrorVisible,
 ) => {
   try {
     await axios.delete(`${API_URL}${deleteItem.id}/`)
@@ -96,9 +78,8 @@ export const runDeleteItem = async (
     setModalDeleteVisible(false)
   } catch (err) {
     setErrorMessage({
-      title: 'Failed to delete composers',
+      title: 'Failed to delete ' + ITEM,
       content: err.message,
     })
-    setModalErrorVisible(true)
   }
 }

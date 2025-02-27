@@ -38,8 +38,13 @@ const Composer = () => {
   const [modalErrorVisible, setModalErrorVisible] = useState(false)
 
   useEffect(() => {
-    fetchList(requestPar, setComposers, setTotalPageCount, setErrorMessage, setModalErrorVisible)
+    fetchList(requestPar, setComposers, setTotalPageCount, setErrorMessage)
   }, [requestPar])
+
+  useEffect(() => {
+    if (Object.keys(errorMessage).length === 0) return
+    setModalErrorVisible(true)
+  }, [errorMessage])
 
   return (
     <CRow>
@@ -50,6 +55,7 @@ const Composer = () => {
               <SearchForm
                 requestPar={requestPar}
                 setRequestPar={setRequestPar}
+                setAddItem={setAddItem}
                 setModalAddVisible={setModalAddVisible}
               />
             </CRow>
@@ -81,16 +87,7 @@ const Composer = () => {
       <AddModal
         visible={modalAddVisible}
         onClose={() => setModalAddVisible(false)}
-        onSave={() =>
-          runAddItem(
-            addItem,
-            setRequestPar,
-            setModalAddVisible,
-            setAddItem,
-            setErrorMessage,
-            setModalErrorVisible,
-          )
-        }
+        onSave={() => runAddItem(addItem, setModalAddVisible, setRequestPar, setErrorMessage)}
         item={addItem}
         setItem={setAddItem}
       />
@@ -98,15 +95,7 @@ const Composer = () => {
       <EditModal
         visible={modalEditVisible}
         onClose={() => setModalEditVisible(false)}
-        onSave={() =>
-          runEditItem(
-            editItem,
-            setRequestPar,
-            setModalEditVisible,
-            setErrorMessage,
-            setModalErrorVisible,
-          )
-        }
+        onSave={() => runEditItem(editItem, setModalEditVisible, setRequestPar, setErrorMessage)}
         item={editItem}
         setItem={setEditItem}
       />
@@ -115,13 +104,7 @@ const Composer = () => {
         visible={modalDeleteVisible}
         onClose={() => setModalDeleteVisible(false)}
         onDelete={() =>
-          runDeleteItem(
-            deleteItem,
-            setRequestPar,
-            setModalDeleteVisible,
-            setErrorMessage,
-            setModalErrorVisible,
-          )
+          runDeleteItem(deleteItem, setModalDeleteVisible, setRequestPar, setErrorMessage)
         }
         item={deleteItem}
       />
@@ -129,8 +112,7 @@ const Composer = () => {
       <ErrorModal
         visible={modalErrorVisible}
         onClose={() => setModalErrorVisible(false)}
-        title={errorMessage.title}
-        content={errorMessage.content}
+        message={errorMessage}
       />
     </CRow>
   )

@@ -3,7 +3,7 @@ import { CButton, CCol, CForm, CFormInput, CInputGroup, CInputGroupText } from '
 import CIcon from '@coreui/icons-react'
 import { cilPlus } from '@coreui/icons'
 
-const SearchForm = ({ requestPar, setRequestPar, setModalAddVisible }) => {
+const SearchForm = ({ requestPar, setAddItem, setRequestPar, setModalAddVisible }) => {
   const [searchFullName, setSearchFullName] = useState(requestPar.searchFullName)
 
   // 📌 Composer 검색 기능
@@ -31,7 +31,14 @@ const SearchForm = ({ requestPar, setRequestPar, setModalAddVisible }) => {
         </CButton>
       </CCol>
       <CCol xs="auto" className="ms-auto me-4">
-        <CButton color="info" className="text-white" onClick={() => setModalAddVisible(true)}>
+        <CButton
+          color="info"
+          className="text-white"
+          onClick={() => {
+            setAddItem({})
+            setModalAddVisible(true)
+          }}
+        >
           <CIcon icon={cilPlus} size="l" className="me-2" />
           Add Composer
         </CButton>

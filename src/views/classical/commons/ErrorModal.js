@@ -1,11 +1,11 @@
 import React from 'react'
 import { CModal, CModalHeader, CModalBody, CModalFooter, CButton } from '@coreui/react'
 
-const ErrorModal = ({ visible, onClose, title, content }) => {
+const ErrorModal = ({ visible, onClose, message }) => {
   return (
     <CModal visible={visible} onClose={onClose}>
-      <CModalHeader>{title}</CModalHeader>
-      <CModalBody>{content}</CModalBody>
+      <CModalHeader>{message.title}</CModalHeader>
+      <CModalBody>{message.content}</CModalBody>
       <CModalFooter>
         <CButton color="secondary" onClick={onClose}>
           Close
