@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { convertSnakeToCamel } from '../../../utils/formatters' // ✅ 유틸 함수 가져오기
 
-const API_URL = 'http://127.0.0.1:8000/api/composers/'
+const API_URL = 'http://127.0.0.1:8000/api/performers/'
 const PAGE_SIZE = 20
-const ITEM = 'composer'
+const ITEM = 'performer'
 
 // ✅ 목록 가져오기
 export const fetchList = async (requestPar, setComposers, setTotalPageCount, setErrorMessage) => {
@@ -11,6 +11,7 @@ export const fetchList = async (requestPar, setComposers, setTotalPageCount, set
     const response = await axios.get(API_URL, {
       params: {
         page: requestPar.page,
+        role: requestPar.searchRole,
         full_name: requestPar.searchFullName,
       },
     })
@@ -32,6 +33,7 @@ export const runAddItem = async (addItem, setModalAddVisible, setRequestPar, set
 
   try {
     await axios.post(API_URL, {
+      role: addItem.role,
       name: addItem.name,
       full_name: addItem.fullName,
     })
@@ -53,6 +55,7 @@ export const runEditItem = async (
 ) => {
   try {
     await axios.put(`${API_URL}${editItem.id}/`, {
+      role: editItem.role,
       name: editItem.name,
       full_name: editItem.fullName,
     })
