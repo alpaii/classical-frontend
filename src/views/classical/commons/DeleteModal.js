@@ -1,11 +1,11 @@
 import React from 'react'
 import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react'
 
-const DeleteModal = ({ visible, onClose, onDelete, item }) => {
+const DeleteModal = ({ title, visible, onClose, onDelete, item }) => {
   return (
     <CModal visible={visible} onClose={onClose}>
       <CModalHeader>
-        <CModalTitle>Delete Performer</CModalTitle>
+        <CModalTitle>{title}</CModalTitle>
       </CModalHeader>
       <CModalBody>
         <div className="mt-2">Are you sure you want to delete this item?</div>

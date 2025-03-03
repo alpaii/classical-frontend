@@ -21,7 +21,7 @@ export const fetchList = async (requestPar, setWorks, setTotalPageCount, setErro
   } catch (err) {
     setErrorMessage({
       title: 'Failed to load ' + ITEM,
-      content: err.message,
+      err,
     })
   }
 }
@@ -43,8 +43,7 @@ export const runAddItem = async (addItem, setModalAddVisible, setRequestPar, set
   } catch (err) {
     setErrorMessage({
       title: 'Failed to add ' + ITEM,
-      content: err.message,
-      detail: JSON.stringify(err.response?.data),
+      err,
     })
   }
 }
@@ -66,8 +65,7 @@ export const runEditItem = async (
   } catch (err) {
     setErrorMessage({
       title: 'Failed to edit ' + ITEM,
-      content: err.message,
-      detail: JSON.stringify(err.response?.data),
+      err,
     })
   }
 }
@@ -85,7 +83,7 @@ export const runDeleteItem = async (
   } catch (err) {
     setErrorMessage({
       title: 'Failed to delete ' + ITEM,
-      content: err.message,
+      err,
     })
   }
 }

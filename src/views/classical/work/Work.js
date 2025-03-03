@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Form } from 'react-router-dom'
 import { CRow, CCol, CCard, CCardBody, CButton } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilChevronLeft } from '@coreui/icons'
 
-import { ErrorModal, Pagination } from '../commons'
-import { SearchForm, DataTable, AddModal, EditModal, DeleteModal } from './components'
+import { ErrorModal, Pagination, DeleteModal } from '../commons'
+import { SearchForm, DataTable, FormModal } from './components'
 import { fetchList, runAddItem, runEditItem, runDeleteItem } from './api'
 
 const Work = () => {
@@ -115,7 +115,8 @@ const Work = () => {
         </CCard>
       </CCol>
 
-      <AddModal
+      <FormModal
+        title="Add Work"
         visible={modalAddVisible}
         onClose={() => setModalAddVisible(false)}
         onSave={() => runAddItem(addItem, setModalAddVisible, setRequestPar, setErrorMessage)}
@@ -123,7 +124,8 @@ const Work = () => {
         setItem={setAddItem}
       />
 
-      <EditModal
+      <FormModal
+        title="Edit Work"
         visible={modalEditVisible}
         onClose={() => setModalEditVisible(false)}
         onSave={() => runEditItem(editItem, setModalEditVisible, setRequestPar, setErrorMessage)}
@@ -132,6 +134,7 @@ const Work = () => {
       />
 
       <DeleteModal
+        title="Delete Work"
         visible={modalDeleteVisible}
         onClose={() => setModalDeleteVisible(false)}
         onDelete={() =>

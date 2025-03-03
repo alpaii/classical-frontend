@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { CRow, CCol, CCard, CCardBody } from '@coreui/react'
 
-import { ErrorModal, Pagination } from '../commons'
-import { SearchForm, DataTable, AddModal, EditModal, DeleteModal } from './components'
+import { ErrorModal, Pagination, DeleteModal } from '../commons'
+import { SearchForm, DataTable, FormModal } from './components'
 import { fetchList, runAddItem, runEditItem, runDeleteItem } from './api'
 
 const Composer = () => {
@@ -84,7 +84,8 @@ const Composer = () => {
         </CCard>
       </CCol>
 
-      <AddModal
+      <FormModal
+        title="Add Composer"
         visible={modalAddVisible}
         onClose={() => setModalAddVisible(false)}
         onSave={() => runAddItem(addItem, setModalAddVisible, setRequestPar, setErrorMessage)}
@@ -92,7 +93,8 @@ const Composer = () => {
         setItem={setAddItem}
       />
 
-      <EditModal
+      <FormModal
+        title="Edit Composer"
         visible={modalEditVisible}
         onClose={() => setModalEditVisible(false)}
         onSave={() => runEditItem(editItem, setModalEditVisible, setRequestPar, setErrorMessage)}
@@ -101,6 +103,7 @@ const Composer = () => {
       />
 
       <DeleteModal
+        title="Delete Composer"
         visible={modalDeleteVisible}
         onClose={() => setModalDeleteVisible(false)}
         onDelete={() =>

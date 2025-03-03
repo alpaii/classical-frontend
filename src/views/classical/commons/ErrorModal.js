@@ -6,9 +6,9 @@ const ErrorModal = ({ visible, onClose, message }) => {
     <CModal visible={visible} onClose={onClose}>
       <CModalHeader>{message.title}</CModalHeader>
       <CModalBody>
-        <div>{message.content}</div>
+        <div>{message.err?.message || ''}</div>
         <br />
-        <div>{message?.detail ?? ''}</div>
+        <div>{JSON.stringify(message.err?.response.data || '')}</div>
       </CModalBody>
       <CModalFooter>
         <CButton color="secondary" onClick={onClose}>

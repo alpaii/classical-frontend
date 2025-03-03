@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { CRow, CCol, CCard, CCardBody } from '@coreui/react'
 
-import { ErrorModal, Pagination } from '../commons'
-import { SearchForm, DataTable, AddModal, EditModal, DeleteModal } from './components'
+import { ErrorModal, Pagination, DeleteModal } from '../commons'
+import { SearchForm, DataTable, FormModal } from './components'
 import { fetchList, runAddItem, runEditItem, runDeleteItem } from './api'
 
 const Performer = () => {
@@ -85,7 +85,8 @@ const Performer = () => {
         </CCard>
       </CCol>
 
-      <AddModal
+      <FormModal
+        title="Add Performer"
         visible={modalAddVisible}
         onClose={() => setModalAddVisible(false)}
         onSave={() => runAddItem(addItem, setModalAddVisible, setRequestPar, setErrorMessage)}
@@ -93,7 +94,8 @@ const Performer = () => {
         setItem={setAddItem}
       />
 
-      <EditModal
+      <FormModal
+        title="Edit Performer"
         visible={modalEditVisible}
         onClose={() => setModalEditVisible(false)}
         onSave={() => runEditItem(editItem, setModalEditVisible, setRequestPar, setErrorMessage)}
@@ -102,6 +104,7 @@ const Performer = () => {
       />
 
       <DeleteModal
+        title="Delete Performer"
         visible={modalDeleteVisible}
         onClose={() => setModalDeleteVisible(false)}
         onDelete={() =>
