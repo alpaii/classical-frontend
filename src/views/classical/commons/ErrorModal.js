@@ -5,7 +5,11 @@ const ErrorModal = ({ visible, onClose, message }) => {
   return (
     <CModal visible={visible} onClose={onClose}>
       <CModalHeader>{message.title}</CModalHeader>
-      <CModalBody>{message.content}</CModalBody>
+      <CModalBody>
+        <div>{message.content}</div>
+        <br />
+        <div>{message?.detail ?? ''}</div>
+      </CModalBody>
       <CModalFooter>
         <CButton color="secondary" onClick={onClose}>
           Close

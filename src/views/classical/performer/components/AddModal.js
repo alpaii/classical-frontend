@@ -21,6 +21,8 @@ const AddModal = ({ visible, onClose, onSave, item, setItem }) => {
     }
   }, [visible])
 
+  const onChangeRole = (role) => setItem({ ...item, role })
+
   return (
     <CModal visible={visible} onClose={onClose}>
       <CModalHeader>
@@ -29,7 +31,7 @@ const AddModal = ({ visible, onClose, onSave, item, setItem }) => {
       <CModalBody>
         <CForm>
           <CFormLabel>Role</CFormLabel>
-          <RoleSelect value="" onChange={(e) => setItem({ ...item, role: e.target.value })} />
+          <RoleSelect value={item.role || ''} onChange={onChangeRole} />
           <CFormLabel>Name</CFormLabel>
           <CFormInput
             ref={nameInputRef} // ✅ 자동 포커스

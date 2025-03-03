@@ -10,41 +10,43 @@ import {
   CModalHeader,
   CModalTitle,
 } from '@coreui/react'
-import RoleSelect from './RoleSelect'
 
-const EditModal = ({ visible, onClose, onSave, item, setItem }) => {
+const AddModal = ({ visible, onClose, onSave, item, setItem }) => {
   const nameInputRef = useRef(null)
 
   useEffect(() => {
     if (visible) {
-      setTimeout(() => nameInputRef.current?.focus(), 200) // ✅ 자동 포커스
+      setTimeout(() => nameInputRef.current?.focus(), 200) // ✅ 모달이 열리면 name 필드에 포커스
     }
   }, [visible])
-
-  const onChangeRole = (role) => setItem({ ...item, role })
 
   return (
     <CModal visible={visible} onClose={onClose}>
       <CModalHeader>
-        <CModalTitle>Edit Performer</CModalTitle>
+        <CModalTitle>Add Work</CModalTitle>
       </CModalHeader>
       <CModalBody>
         <CForm>
-          <CFormLabel>Role</CFormLabel>
-          <RoleSelect value={item.role || ''} onChange={onChangeRole} />
-          <CFormLabel>Name</CFormLabel>
+          <CFormLabel>Composer</CFormLabel>
+          <CFormInput
+            type="text"
+            disabled
+            value={item.composerFullName || ''}
+            className="border border-dark"
+          />
+          <CFormLabel className="mt-3">Work No</CFormLabel>
           <CFormInput
             ref={nameInputRef} // ✅ 자동 포커스
             type="text"
-            value={item.name || ''}
-            onChange={(e) => setItem({ ...item, name: e.target.value })}
+            value={item.workNo || ''}
+            onChange={(e) => setItem((prev) => ({ ...prev, workNo: e.target.value }))}
             className="border border-dark"
           />
-          <CFormLabel className="mt-3">Full Name</CFormLabel>
+          <CFormLabel className="mt-3">Name</CFormLabel>
           <CFormInput
             type="text"
-            value={item.fullName || ''}
-            onChange={(e) => setItem({ ...item, fullName: e.target.value })}
+            value={item.name || ''}
+            onChange={(e) => setItem((prev) => ({ ...prev, name: e.target.value }))}
             className="border border-dark"
           />
         </CForm>
@@ -61,4 +63,4 @@ const EditModal = ({ visible, onClose, onSave, item, setItem }) => {
   )
 }
 
-export default EditModal
+export default AddModal

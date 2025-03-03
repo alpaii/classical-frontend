@@ -13,7 +13,7 @@ import CIcon from '@coreui/icons-react'
 import { cilPencil, cilX } from '@coreui/icons'
 
 const DataTable = ({
-  performers,
+  works,
   requestPar,
   setEditItem,
   setModalEditVisible,
@@ -27,15 +27,12 @@ const DataTable = ({
       <CTableHead color="success" className="border-2">
         <CTableRow>
           <CTableHeaderCell scope="col" style={{ width: '300px' }} className="text-center">
-            Name
+            Work No.
           </CTableHeaderCell>
           <CTableHeaderCell scope="col" style={{ width: '500px' }} className="text-center">
-            Full Name
+            Name
           </CTableHeaderCell>
-          <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
-            Role
-          </CTableHeaderCell>
-          <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
+          <CTableHeaderCell scope="col" style={{ width: '150px' }} className="text-center">
             Recording Count
           </CTableHeaderCell>
           <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
@@ -44,13 +41,12 @@ const DataTable = ({
         </CTableRow>
       </CTableHead>
       <CTableBody>
-        {performers.map((performer) => (
-          <CTableRow key={performer.id}>
-            <CTableDataCell className="table-cell-wrap">{performer.name}</CTableDataCell>
-            <CTableDataCell className="table-cell-wrap">{performer.fullName}</CTableDataCell>
-            <CTableDataCell className="text-center">{performer.role}</CTableDataCell>
+        {works.map((work) => (
+          <CTableRow key={work.id}>
+            <CTableDataCell className="table-cell-wrap">{work.workNo}</CTableDataCell>
+            <CTableDataCell className="table-cell-wrap">{work.name}</CTableDataCell>
             <CTableDataCell className="text-center">
-              {performer.recordingCount === 0 ? (
+              {work.recordingCount === 0 ? (
                 '-'
               ) : (
                 <CButton
@@ -59,26 +55,25 @@ const DataTable = ({
                   onClick={() => {
                     navigate('/classical/recording', {
                       state: {
-                        performerInfo: performer,
-                        requestParPerformer: requestPar,
+                        workInfo: work,
+                        requestParWork: requestPar,
                       },
                     })
                   }}
                   className="p-0"
-                  style={{ width: '50px', textAlign: 'center' }} // ✅ 버튼 크기 고정
+                  style={{ width: '50px', textAlign: 'center' }}
                 >
-                  <span style={{ fontSize: '1.1rem' }}>{performer.recordingCount}</span>
+                  <span style={{ fontSize: '1.1rem' }}>{work.recordingCount}</span>
                 </CButton>
               )}
             </CTableDataCell>
-
             <CTableDataCell className="text-center">
               <CButton
                 color="info"
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setEditItem(performer)
+                  setEditItem((prev) => ({ ...prev, ...work }))
                   setModalEditVisible(true)
                 }}
                 className="hover-white me-2"
@@ -90,7 +85,7 @@ const DataTable = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setDeleteItem(performer)
+                  setDeleteItem(work)
                   setModalDeleteVisible(true)
                 }}
                 className="hover-white"
