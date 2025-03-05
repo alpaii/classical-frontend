@@ -12,14 +12,26 @@ import { useNavigate } from 'react-router-dom'
 import CIcon from '@coreui/icons-react'
 import { cilPencil, cilX } from '@coreui/icons'
 
+const roleOrder = [
+  'Conductor',
+  'Orchestra',
+  'Ensemble',
+  'Choir',
+  'Piano',
+  'Violin',
+  'Cello',
+  'Viola',
+  'Double Bass',
+  'Flute',
+]
+
 const DataTable = ({
-  works,
+  recordings,
   requestPar,
   setEditItem,
   setModalEditVisible,
   setDeleteItem,
   setModalDeleteVisible,
-  state,
 }) => {
   const navigate = useNavigate()
 
@@ -27,14 +39,11 @@ const DataTable = ({
     <CTable bordered striped hover style={{ width: 'auto' }} className="border-success">
       <CTableHead color="success" className="border-2">
         <CTableRow>
-          <CTableHeaderCell scope="col" style={{ width: '300px' }} className="text-center">
-            Work No.
+          <CTableHeaderCell scope="col" style={{ width: '100px' }} className="text-center">
+            Year
           </CTableHeaderCell>
           <CTableHeaderCell scope="col" style={{ width: '500px' }} className="text-center">
-            Name
-          </CTableHeaderCell>
-          <CTableHeaderCell scope="col" style={{ width: '150px' }} className="text-center">
-            Recording Count
+            Performers
           </CTableHeaderCell>
           <CTableHeaderCell scope="col" style={{ width: '200px' }} className="text-center">
             Actions
@@ -42,32 +51,21 @@ const DataTable = ({
         </CTableRow>
       </CTableHead>
       <CTableBody>
-        {works.map((work) => (
-          <CTableRow key={work.id}>
-            <CTableDataCell className="table-cell-wrap">{work.workNo}</CTableDataCell>
-            <CTableDataCell className="table-cell-wrap">{work.name}</CTableDataCell>
-            <CTableDataCell className="text-center">
-              {work.recordingCount === 0 ? (
-                '-'
-              ) : (
-                <CButton
-                  color="warning"
-                  size="sm"
-                  onClick={() => {
-                    navigate('/classical/recording', {
-                      state: {
-                        ...state,
-                        workInfo: work,
-                        requestParWork: requestPar,
-                      },
-                    })
-                  }}
-                  className="p-0"
-                  style={{ width: '50px', textAlign: 'center' }}
-                >
-                  <span style={{ fontSize: '1.1rem' }}>{work.recordingCount}</span>
-                </CButton>
-              )}
+        {recordings.map((recording) => (
+          <CTableRow key={recording.id}>
+            <CTableDataCell className="table-cell-wrap text-center">
+              {recording.year}
+            </CTableDataCell>
+            <CTableDataCell className="table-cell-wrap">
+              {recording.performers
+                .slice()
+                .sort((a, b) => roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role)) // role 순서대로 정렬
+                .map((performer) => (
+                  <div key={performer.id}>
+                    <span style={{ fontSize: '1.1em' }}>{performer.fullName}</span>{' '}
+                    <span className="text-secondary fst-italic">{performer.role}</span>
+                  </div>
+                ))}
             </CTableDataCell>
             <CTableDataCell className="text-center">
               <CButton
@@ -75,7 +73,8 @@ const DataTable = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setEditItem((prev) => ({ ...prev, ...work }))
+                  console.log('Edit:', recording)
+                  setEditItem((prev) => ({ ...prev, ...recording }))
                   setModalEditVisible(true)
                 }}
                 className="hover-white me-2"
@@ -87,7 +86,7 @@ const DataTable = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setDeleteItem(work)
+                  setDeleteItem(recording)
                   setModalDeleteVisible(true)
                 }}
                 className="hover-white"

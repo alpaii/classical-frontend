@@ -5,18 +5,19 @@ import { cilPlus } from '@coreui/icons'
 
 const SearchForm = ({
   composerInfo,
+  workInfo,
   requestPar,
   setAddItem,
   setRequestPar,
   setModalAddVisible,
 }) => {
-  const [searchWorkNo, setSearchWorkNo] = useState(requestPar.searchWorkNo)
-  const [searchName, setSearchName] = useState(requestPar.searchName)
+  // const [searchWorkNo, setSearchWorkNo] = useState(requestPar.searchWorkNo)
+  // const [searchName, setSearchName] = useState(requestPar.searchName)
 
   // 📌 검색 기능
   const search = async (e) => {
     e.preventDefault() // 기본 폼 제출 동작 방지
-    setRequestPar((prev) => ({ ...prev, page: 1, searchWorkNo, searchName })) // 검색어 적용, 페이지 초기화
+    setRequestPar((prev) => ({ ...prev, page: 1, workId: workInfo.id })) // 검색어 적용, 페이지 초기화
   }
 
   return (
@@ -37,19 +38,19 @@ const SearchForm = ({
           <CInputGroupText className="border border-primary">Work No.</CInputGroupText>
           <CFormInput
             type="text"
-            value={searchWorkNo}
-            onChange={(e) => setSearchWorkNo(e.target.value)}
+            value={workInfo.workNo}
+            disabled
             className="border border-primary"
           />
         </CInputGroup>
       </CCol>
-      <CCol xs="auto">
+      <CCol style={{ flex: 'none', width: '400px' }}>
         <CInputGroup>
-          <CInputGroupText className="border border-primary">Name</CInputGroupText>
+          <CInputGroupText className="border border-primary">Work Name</CInputGroupText>
           <CFormInput
             type="text"
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
+            value={workInfo.name}
+            disabled
             className="border border-primary"
           />
         </CInputGroup>
@@ -64,12 +65,12 @@ const SearchForm = ({
           color="info"
           className="text-white"
           onClick={() => {
-            setAddItem((prev) => ({ ...prev, workNo: '', name: '' }))
+            setAddItem((prev) => ({ ...prev }))
             setModalAddVisible(true)
           }}
         >
           <CIcon icon={cilPlus} size="l" className="me-2" />
-          Add Work
+          Add Recording
         </CButton>
       </CCol>
     </CForm>

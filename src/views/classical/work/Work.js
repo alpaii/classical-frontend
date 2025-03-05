@@ -101,6 +101,7 @@ const Work = () => {
               setModalEditVisible={setModalEditVisible}
               setDeleteItem={setDeleteItem}
               setModalDeleteVisible={setModalDeleteVisible}
+              state={location.state}
             />{' '}
             <CRow>
               <CCol xs="auto">
