@@ -1,7 +1,6 @@
 import React from 'react'
 import { CForm, CFormInput, CFormLabel } from '@coreui/react'
-import { FormModalFrame } from '../../commons/'
-import RoleSelect from './RoleSelect'
+import { FormModalFrame, RoleSelect } from '../../commons/'
 
 const FormModal = ({ visible, onClose, onSave, item, setItem }) => {
   const onChangeRole = (role) => setItem({ ...item, role })

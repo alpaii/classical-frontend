@@ -1,4 +1,4 @@
-import { CInputGroup, CInputGroupText, CFormSelect } from '@coreui/react'
+import { CFormSelect } from '@coreui/react'
 
 const ROLE_CHOICES = [
   'Conductor',

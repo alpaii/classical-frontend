@@ -62,7 +62,7 @@ const DataTable = ({
                 .sort((a, b) => roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role)) // role 순서대로 정렬
                 .map((performer) => (
                   <div key={performer.id}>
-                    <span style={{ fontSize: '1.1em' }}>{performer.fullName}</span>{' '}
+                    <span>{performer.fullName}</span>{' '}
                     <span className="text-secondary fst-italic">{performer.role}</span>
                   </div>
                 ))}

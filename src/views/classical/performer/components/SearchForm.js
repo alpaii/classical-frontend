@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { CButton, CCol, CForm, CFormInput, CInputGroup, CInputGroupText } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilPlus } from '@coreui/icons'
-import RoleSelect from './RoleSelect'
+import { RoleSelect } from '../../commons/'
 
 const SearchForm = ({ requestPar, setAddItem, setRequestPar, setModalAddVisible }) => {
   const [searchRole, setSearchRole] = useState(requestPar.searchRole)
